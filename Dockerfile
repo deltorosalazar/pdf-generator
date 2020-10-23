@@ -23,4 +23,15 @@ RUN apt-get -y clean && \
     apt-get -y purge && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 
-EXPOSE 4000
+RUN mkdir -p /usr/src/app
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN npm install --only=prod
+
+EXPOSE 8080
+
+CMD [ "npm", "run", "prod" ]
+
