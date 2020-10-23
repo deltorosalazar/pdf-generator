@@ -1,0 +1,34 @@
+{
+  "name": "pdf-generator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier . -c",
+    "start": "nodemon index.js",
+    "generate-deploy-package": "./scripts/generate-deploy-package.sh",
+    "prod": "NODE_ENV=production node index.js"
+  },
+  "dependencies": {
+    "anychart": "8.3.0",
+    "anychart-nodejs": "^1.3.8",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "google-spreadsheet": "^3.0.13",
+    "googleapis": "39",
+    "handlebars": "^4.7.6",
+    "helmet": "^4.1.1",
+    "morgan": "^1.10.0",
+    "serverless-http": "^2.6.0",
+    "stream-to-array": "^2.3.0",
+    "wkhtmltopdf": "^0.3.4"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.770.0",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4"
+  }
+}

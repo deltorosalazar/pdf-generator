@@ -1,0 +1,204 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cloudformation template for Indigo Project, a invoice generetor for customers
+  provided by Miranda and Sage500
+Parameters:
+  GoogleApiKey:
+    Type: String
+    Default: ''
+    Description: GoogleApiKey to GoogleSheets
+  GoogleApiUser:
+    Type: String
+    Default: ''
+    Description: GoogleApiUser to GoogleSheets
+Resources:
+  ServerlessDeploymentBucket:
+    Type: AWS::S3::Bucket
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AWS::StackName}_backend'
+  IamRoleLambdaExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: "PdfGenerator"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}_backend:*'
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}_backend:*:*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}_init:*'
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}_init:*:*'
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:
+                  - !GetAtt 'UploadBucket.Arn'
+                  - !Join
+                    - ''
+                    - - !GetAtt 'UploadBucket.Arn'
+                      - /*
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DetachNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+      Path: /
+      RoleName: "PdfGenerator"
+  AppLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Pdf generetor lambda Function
+      Code:
+        ZipFile: "exports.handler = (event, context, callback) => {\n    callback(null,\
+          \ \"Hello World!\");\n};\n"
+      FunctionName: !Sub '${AWS::StackName}-lambda'
+      Handler: index.handler
+      MemorySize: 1024
+      Role: !GetAtt 'IamRoleLambdaExecution.Arn'
+      Runtime: nodejs12.x
+      Timeout: 180
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !Ref 'UploadBucket'
+          GOOGLE_API_KEY:  !Ref 'GoogleApiKey'
+          GOOGLE_API_USER: !Ref 'GoogleApiUser'
+    DependsOn:
+      - AppLogGroup
+      - IamRoleLambdaExecution
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "PdfGenerator"
+      EndpointConfiguration:
+        Types:
+          - EDGE
+  ApiGatewayResourceProxyVar:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt 'ApiGatewayRestApi.RootResourceId'
+      PathPart: '{proxy+}'
+      RestApiId: !Ref 'ApiGatewayRestApi'
+  ApiGatewayMethodAny:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      RequestParameters: {}
+      ResourceId: !GetAtt 'ApiGatewayRestApi.RootResourceId'
+      RestApiId: !Ref 'ApiGatewayRestApi'
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Join
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':apigateway:'
+            - !Ref 'AWS::Region'
+            - :lambda:path/2015-03-31/functions/
+            - !GetAtt 'AppLambdaFunction.Arn'
+            - /invocations
+      MethodResponses: []
+  ApiGatewayMethodProxyVarAny:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      RequestParameters: {}
+      ResourceId: !Ref 'ApiGatewayResourceProxyVar'
+      RestApiId: !Ref 'ApiGatewayRestApi'
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Join
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':apigateway:'
+            - !Ref 'AWS::Region'
+            - :lambda:path/2015-03-31/functions/
+            - !GetAtt 'AppLambdaFunction.Arn'
+            - /invocations
+      MethodResponses: []
+  ApiGatewayDeployment1534439256647:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref 'ApiGatewayRestApi'
+      StageName: 'stage'
+    DependsOn:
+      - ApiGatewayMethodAny
+      - ApiGatewayMethodProxyVarAny
+  AppLambdaPermissionApiGateway:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt 'AppLambdaFunction.Arn'
+      Action: lambda:InvokeFunction
+      Principal: !Join
+        - ''
+        - - apigateway.
+          - !Ref 'AWS::URLSuffix'
+      SourceArn: !Join
+        - ''
+        - - 'arn:'
+          - !Ref 'AWS::Partition'
+          - ':execute-api:'
+          - !Ref 'AWS::Region'
+          - ':'
+          - !Ref 'AWS::AccountId'
+          - ':'
+          - !Ref 'ApiGatewayRestApi'
+          - /*/*
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub '${AWS::StackName}-generated-files'
+Outputs:
+  ServerlessDeploymentBucketName:
+    Value: !Ref 'ServerlessDeploymentBucket'
+  ServiceEndpoint:
+    Description: URL of the service endpoint
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref 'ApiGatewayRestApi'
+        - !Sub '.execute-api.${AWS::Region}.'
+        - !Ref 'AWS::URLSuffix'
+  ServerlessDeploymentBucketARN:
+    Value: !GetAtt 'ServerlessDeploymentBucket.Arn'
+  UploadBucketARN:
+    Value: !GetAtt 'UploadBucket.Arn'
+  AppLambdaFunctionARN:
+    Value: !GetAtt 'AppLambdaFunction.Arn'
+  AppLogGroupARN:
+    Value: !GetAtt 'AppLogGroup.Arn'
