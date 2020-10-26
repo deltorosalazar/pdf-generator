@@ -95,12 +95,12 @@ app.post('/', async function(req, res) {
     mentalChart: null
   })
 
-  result.pipe(res);
+  result.pipe(res)
 
   return res.writeHead(200, {
     'Content-Type': 'application/pdf',
     'Access-Control-Allow-Origin': '*',
-    'Content-Disposition': 'inline; filename=order.pdf'
+    'Content-Disposition': `inline; filename=${computedResults.date}-${computedResults.patientName}.pdf`
   })
 });
 

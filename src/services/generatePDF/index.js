@@ -3,7 +3,6 @@ const handlebars = require("./../../helpers/handlebars");
 const wkhtmltopdf = require("../../helpers/pdf/wkhtmltopdf");
 const toArray = require("stream-to-array");
 const S3 = require("./../../helpers/aws/s3");
-const PDFStreamToBuffer = require("../../helpers/pdf/PDFRStreamForBuffer");
 
 /**
  *
@@ -12,7 +11,7 @@ const PDFStreamToBuffer = require("../../helpers/pdf/PDFRStreamForBuffer");
  * @param {*} results
  * @param {*} otherCharts
  */
-const generatePdf = (chart, reportToGenerate, results, otherCharts) => {
+const generatePdf = (chart, reportToGenerate, results, otherCharts, saveToS3) => {
   const { template } = reportToGenerate;
 
   const options = {
@@ -39,11 +38,29 @@ const generatePdf = (chart, reportToGenerate, results, otherCharts) => {
     ...otherCharts
   });
 
-  wkhtmltopdf(resultHtml, options)
-      .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
+  // For debugging purposes.
+  // wkhtmltopdf(resultHtml, options)
+  //     .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
+
+  if (saveToS3) {
+    wkhtmltopdf(resultHtml, options, function (error, stream) {
+      if (error) return reject(error);
+
+      return toArray(stream)
+        .then(function (parts) {
+          const buffers = parts.map((part) =>
+            Buffer.isBuffer(part) ? part : Buffer.from(part)
+          );
+
+          let generatedBuffer = Buffer.concat(buffers);
+
+          resolve(generatedBuffer);
+        })
+        .catch(reject);
+    });
+  }
 
   const stream = wkhtmltopdf(resultHtml, options)
-  // console.log(stream)
 
   return Promise.resolve(stream)
 

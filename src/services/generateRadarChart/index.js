@@ -67,13 +67,13 @@ const generateRadarChart = async (computedResults, reportToGenerate) => {
   let base64data = buff.toString('base64')
 
   // For debugging purposes.
-  fs.writeFile(`${Date.now()}.jpg`, image, function (fsWriteError) {
-    if (fsWriteError) {
-      console.log(fsWriteError);
-    } else {
-      console.log('Complete');
-    }
-  });
+  // fs.writeFile(`${Date.now()}.jpg`, image, function (fsWriteError) {
+  //   if (fsWriteError) {
+  //     console.log(fsWriteError);
+  //   } else {
+  //     console.log('Complete');
+  //   }
+  // });
 
   return Promise.resolve(base64data)
 
