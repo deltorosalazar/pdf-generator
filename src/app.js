@@ -36,7 +36,7 @@ app.get('/', function(req, res) {
   })
 })
 
-app.post('/', async function(req, res) {
+app.post('/api/report', async function(req, res) {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
 
   const mandatoryParams = ['id', 'report']
