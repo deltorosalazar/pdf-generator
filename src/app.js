@@ -8,7 +8,7 @@ const cors = require('cors')
 const morgan = require('morgan')
 const app = express()
 const generatePdf = require('./services/generatePDF')
-
+const generateBase = require('./services/generatePDF/generateBase')
 const {
   computeResults,
   generateRadarChart,
@@ -96,7 +96,6 @@ app.post('/api/report', async function(req, res) {
   })
 
   result.pipe(res)
-
   return res.writeHead(200, {
     'Content-Type': 'application/pdf',
     'Access-Control-Allow-Origin': '*',
@@ -106,7 +105,7 @@ app.post('/api/report', async function(req, res) {
 
 // Endpoint to return file in base64
 app.post('/base', async function(req, res) {
-  const { body } = req
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
 
   const mandatoryParams = ['id', 'report']
 
@@ -147,12 +146,31 @@ app.post('/base', async function(req, res) {
   const computedResults = await computeResults(results, reportToGenerate)
 
   const chart = await generateRadarChart(computedResults, reportToGenerate)
-  let images = []
-  let result = await generatePdf(chart, images, reportToGenerate, computedResults)
+  let symptomsChart = null
 
+  if (computedResults.symptoms) {
+    const chartConfig = {
+      axisLabelHeight: 80,
+      axisLabelWidth: 235,
+      axisLabelFontSize: 13
+    }
+
+    symptomsChart = await generateRadarChart(computedResults.symptoms, {chartConfig})
+  }
+  let result = await generateBase(chart, reportToGenerate, computedResults, {
+    symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
+    mentalChart: null
+  })
+  
   return res.status(200).json({
     message: 'ok',
-    file: result.toString('base64')
+    file: result,
+    metadata: {
+      date: computedResults.date,
+      id, 
+      report,
+      patientName: computedResults.patientName
+    }
   })
 });
 

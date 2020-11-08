@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <section class="page">
+    <h4 class="date">{{date}}</h4>
+    <div class="hero-wrapper">
+      <img src="{{hero}}" class="hero">
+    </div>
+    <h1>{{title}}</h1>
+    <p>Haz dado el primer paso para mejorar tu calidad de vida, ajustar tus hábitos permitiendo prevenir futuras
+      enfermedades crónicas y potenciar tu bienestar.</p>
+    <p>{{patientName}}, tu cociente de bienestar con solo valoración consulta sin ADN es de {{wellnessQuotient}}%</p>
+    <div class="images-wrapper">
+      <div class="infography-wrapper">
+        <img src="{{infography}}" class="infography">
+      </div>
+      <div class="chart-wrapper">
+        <img src="{{chart}}" width="100%">
+        <div class="results-wrapper">
+          <table class="results-wrapper__table">
+            <tbody>
+              {{#each labels}}
+              <tr>
+                <td style="width: 130px">{{this}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <table class="results-wrapper__table">
+            <tbody>
+              {{#each percentages}}
+              <tr>
+                <td style="width: 30px" class="{{setColor this}}">
+                  &nbsp;
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <table class="results-wrapper__table">
+            <tbody>
+              {{#each percentages}}
+              <tr>
+                <td>{{this}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="page">
+    <h1>Evaluación Integral y Recomendaciones</h1>
+    <p class="paragraph">
+      Tu calidad de vida depende en gran medida de tu bienestar y tu cociente de bienestar se mide en relación a las
+      siguientes dimensiones:
+    </p>
+    <ul>
+      <li>Bienestar Físico</li>
+      <li>Bienestar Mental</li>
+      <li>Bienestar Emocional</li>
+      <li>Bienestar Social</li>
+    </ul>
+
+    <p class="paragraph">
+      Teniendo esto en cuenta podrás identificar en la gráfica qué áreas requieren tu atención pues se encuentran por
+      debajo del 60% en la escala porcentual.
+    </p>
+
+    <p class="paragraph">
+      Un buen balance de vida es fundamental para incrementar tu cociente de bienestar. Sigue las instrucciones de tus
+      médicos Maika con el fin de gestionar tu salud en los próximos 12 meses y así mejorar tu calidad de vida.
+    </p>
+
+    <p>El conocimiento es la mejor medicina</p>
+
+    <p>Maika es prevención 100%</p>
+
+    <hr>
+
+    <h1>Detalles Evaluación Física en Maika App</h1>
+    <p class="paragraph">{{recomendations.[0]}}</p>
+    <h1>Detalles Evaluación Mental / Social / Emocional en Maika App</h1>
+    <p class="paragraph">{{recomendations.[1]}}</p>
+  </section>
+  <section class="page">
+    <h1>Anexo Detalle Evaluación Física y Mental</h1>
+
+    <div style="border: 1px solid red">
+      <h3>Físico</h3>
+      <img src="{{symptomsChart}}">
+    </div>
+    <div style="border: 1px solid red">
+      <h3>Mental</h3>
+      <img src="{{symptomsChart}}">
+    </div>
+
+  </section>
+  <section class="page">
+    <p class="footnote">
+      La información de este informe no ha sido evaluada por la Administración de Alimentos y Medicamentos ni por ningún
+      otro organismo médico oficial. Esta información está destinada únicamente a fines educativos y está destinada a
+      presentarle algunos de los factores genéticos que pueden afectar su probabilidad relativa de desarrollar ciertas
+      condiciones de salud. Tenga siempre en cuenta que nuestros análisis se basan en un número selecto de genes y SNP,
+      y que los datos que analizamos representan solo una porción relativamente pequeña de todo su genoma. Llevará
+      muchas más variaciones genéticas que las que informamos aquí, y estas otras variantes también pueden tener un
+      impacto potencialmente fuerte en su predisposición a ciertas condiciones de salud u otros rasgos. Las variantes en
+      las que nos centramos son aquellas que se han relacionado con determinadas condiciones de salud a través de
+      estudios de asociación, que son correlativos y no implican necesariamente relaciones causales. Además, los
+      resultados de algunos estudios pueden aplicarse solo a grupos étnicos específicos o un género específico. Por lo
+      tanto, el hecho de que usted sea portador de ciertos genotipos “asociados al riesgo” no significa necesariamente
+      que realmente desarrollará una condición de salud específica. Cualquier variante genética individual contribuirá
+      típicamente solo a una pequeña proporción del riesgo general de desarrollar una condición de salud determinada;
+      muchos otros factores no genéticos, como factores ambientales y de estilo de vida, también pueden influir
+      significativamente en el riesgo de que una persona desarrolle una condición de salud. Por lo tanto, los "resúmenes
+      de riesgos" incluidos en cada sección de este informe no son concluyentes y solo representan una cantidad limitada
+      de su riesgo total como individuo. Por estas razones, las conclusiones de este informe no deben tratarse como
+      concluyentes o completas, no deben usarse como base para tomar decisiones médicas y nunca deben usarse para
+      diagnosticar, tratar, curar o prevenir ninguna enfermedad o dolencia. Ninguna de las sugerencias de salud hechas a
+      lo largo de este informe debe usarse para reemplazar cualquier enfoque de tratamiento que su médico haya
+      recomendado o recetado. Puede optar por probar los enfoques complementarios discutidos en este informe si usted y
+      su médico determinan que podrían ser apropiados para usted: pero siempre asegúrese de discutir primero cualquier
+      cambio con su médico, para evitar interacciones negativas y otros riesgos potenciales. (especialmente si está
+      embarazada, amamantando, tomando medicamentos o tiene una condición médica diagnosticada). Sobre todo, tenga
+      siempre en cuenta que la genética es solo una parte de una ecuación muy compleja, junto con muchos otros factores.
+    </p>
+  </section>
+
+</body>
+<style>
+  .page {
+    border: 1px solid purple;
+    /* For debugging purposes. */
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 279mm;
+  }
+
+  .page:not(:last-of-type) {
+    page-break-after: always;
+  }
+
+  .date {
+    margin-bottom: 16px;
+  }
+
+  .hero-wrapper {
+    height: 300px;
+  }
+
+  .hero {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  .images-wrapper {
+    border: 1px solid black;
+    height: 600px;
+    position: relative;
+    width: 100%;
+  }
+
+  .infography-wrapper {
+    border: 1px solid red;
+    width: 35%;
+
+    position: absolute;
+    top: 50%;
+    left: 0;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+
+  .infography {
+    width: 100%;
+  }
+
+  .chart-wrapper {
+    border: 1px solid black;
+    width: 55%;
+
+    position: absolute;
+    top: 50%;
+    right: 0;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid black;
+  }
+
+  .results-wrapper {
+    padding: 16px;
+  }
+
+  .results-wrapper__table {
+    display: inline-block;
+    border-collapse: collapse;
+    border-spacing: 20px 0;
+  }
+
+  .results-wrapper__table td {
+    font-size: 12px;
+  }
+
+  .red {
+    background: red;
+  }
+
+  .orange {
+    background: orange;
+  }
+
+  .green {
+    background: greenyellow;
+  }
+
+  .paragraph {
+    font-size: 18px;
+  }
+
+  .footnote {
+    font-size: 12px;
+  }
+</style>
+
+</html>

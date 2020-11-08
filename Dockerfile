@@ -8,7 +8,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x  | bash -
 RUN apt-get -y install nodejs
 
 RUN sed 's/main$/main universe/' -i /etc/apt/sources.list
-RUN apt-get update
+RUN apt-get update --fix-missing
 RUN apt-get upgrade -y
 
 # Download and install wkhtmltopdf
