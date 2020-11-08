@@ -96,7 +96,6 @@ app.post('/api/report', async function(req, res) {
   })
 
   result.pipe(res)
-
   return res.writeHead(200, {
     'Content-Type': 'application/pdf',
     'Access-Control-Allow-Origin': '*',
@@ -162,10 +161,16 @@ app.post('/base', async function(req, res) {
     symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
     mentalChart: null
   })
-
+  
   return res.status(200).json({
     message: 'ok',
-    file: result
+    file: result,
+    metadata: {
+      date: computedResults.date,
+      id, 
+      report,
+      patientName: computedResults.patientName
+    }
   })
 });
 

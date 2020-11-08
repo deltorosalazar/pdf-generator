@@ -9,6 +9,8 @@ RUN apt-get -y install nodejs
 
 RUN sed 's/main$/main universe/' -i /etc/apt/sources.list
 RUN apt-get update
+#In case missing dependecies uncomment the following line and comment line 11
+#RUN apt-get update --fix-missing
 RUN apt-get upgrade -y
 
 # Download and install wkhtmltopdf
