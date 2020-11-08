@@ -1,40 +1,50 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet')
+const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const init = async (patientID, reportToGenerate) => {
-  const parsedID = patientID.toString()
+  const parsedID = patientID.toString();
 
-  const formNames = await Promise.all(reportToGenerate.forms.map(form => {
-    return readSheet(form, parsedID)
-  }))
+  const formNames = await Promise.all(
+    reportToGenerate.forms.map((form) => {
+      return readSheet(form, parsedID);
+    })
+  ).catch(function (err) {
+    console.log("A promise failed to resolve", err);
+    return new Error(err.message);
+  });
 
-  return formNames
-}
+  return formNames;
+};
 
 const readSheet = async (formID, patientID) => {
-  const spreadsheet = new GoogleSpreadsheet(formID)
-
-  await spreadsheet.useServiceAccountAuth({
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  })
-
   try {
-    await spreadsheet.loadInfo()
+    const spreadsheet = new GoogleSpreadsheet(formID);
 
-    const sheet = spreadsheet.sheetsByIndex[0]
-    const rows = await sheet.getRows()
+    await spreadsheet.useServiceAccountAuth({
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    });
+
+    await spreadsheet.loadInfo();
+
+    const sheet = spreadsheet.sheetsByIndex[0];
+    const rows = await sheet.getRows();
 
     if (!rows.length) {
       // Improve the way the errors are being handled. 👀
-      throw new Error(`No hay registros en el formulario ${formID}`)
+      throw new Error(`No hay registros en el formulario ${formID}`);
     }
 
-    return getRowsByField(sheet, rows, 'Documento de Identidad Paciente', patientID)
+    return getRowsByField(
+      sheet,
+      rows,
+      "Documento de Identidad Paciente",
+      patientID
+    );
   } catch (e) {
     // Improve the way the errors are being handled. 👀
-    throw new Error(e, `No hay registros en el formulario ${formID}`)
+    throw new Error(e.message, `No hay registros en el formulario ${formID}`);
   }
-}
+};
 
 /**
  *
@@ -44,21 +54,23 @@ const readSheet = async (formID, patientID) => {
  * @param {*} value
  */
 const getRowsByField = (sheet, rows, field, value) => {
-  const { headerValues } = sheet
-  const records = rows.filter(row => row[field].toString() === value.toString())
+  const { headerValues } = sheet;
+  const records = rows.filter(
+    (row) => row[field].toString() === value.toString()
+  );
 
   if (!records.length) {
-    throw new Error(`No se encontro un registro con ese ID ${value}`)
+    throw new Error(`No se encontro un registro con ese ID ${value}`);
   }
 
-  const lastRecord = records.pop()
-  let parsedRecord = {}
+  const lastRecord = records.pop();
+  let parsedRecord = {};
 
-  headerValues.forEach(header => {
-    parsedRecord[header] = lastRecord[header]
-  })
+  headerValues.forEach((header) => {
+    parsedRecord[header] = lastRecord[header];
+  });
 
-  return parsedRecord
-}
+  return parsedRecord;
+};
 
-module.exports = init
+module.exports = init;
