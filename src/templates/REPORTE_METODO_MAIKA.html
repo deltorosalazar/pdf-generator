@@ -95,13 +95,18 @@
 
     <div style="border: 1px solid red">
       <h3>Físico</h3>
-      <img src="{{symptomsChart}}">
+      <div style="text-align: center;">
+        <img src="{{symptomsChart}}" width="80%" style="border: 1px solid purple">
+      </div>
     </div>
+  </section>
+  <section class="page">
     <div style="border: 1px solid red">
       <h3>Mental</h3>
-      <img src="{{symptomsChart}}">
+      <div style="text-align: center;">
+        <img src="{{mentalChart}}" width="80%" style="border: 1px solid purple">
+      </div>
     </div>
-
   </section>
   <section class="page">
     <p class="footnote">
@@ -135,6 +140,10 @@
 
 </body>
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   .page {
     border: 1px solid purple;
     /* For debugging purposes. */

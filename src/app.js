@@ -87,6 +87,7 @@ app.post("/api/report", async function (req, res) {
 
     const chart = await generateRadarChart(computedResults, reportToGenerate);
     let symptomsChart = null;
+    let anexoMentalChart = null;
 
     if (computedResults.symptoms) {
       const chartConfig = {
@@ -100,9 +101,21 @@ app.post("/api/report", async function (req, res) {
       });
     }
 
+    if (computedResults.anexoMental) {
+      const chartConfig = {
+        axisLabelHeight: 50,
+        axisLabelWidth: 115,
+        axisLabelFontSize: 12,
+      };
+
+      anexoMentalChart = await generateRadarChart(computedResults.anexoMental, {
+        chartConfig,
+      });
+    }
+
     let result = await generatePdf(chart, reportToGenerate, computedResults, {
       symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
-      mentalChart: null,
+      mentalChart: `data:image/jpg;base64,${anexoMentalChart}`
     });
 
     result.pipe(res);
@@ -165,6 +178,7 @@ app.post("/base", async function (req, res) {
 
     const chart = await generateRadarChart(computedResults, reportToGenerate);
     let symptomsChart = null;
+    let anexoMentalChart = null;
 
     if (computedResults.symptoms) {
       const chartConfig = {
@@ -177,9 +191,22 @@ app.post("/base", async function (req, res) {
         chartConfig,
       });
     }
+
+    if (computedResults.anexoMental) {
+      const chartConfig = {
+        axisLabelHeight: 80,
+        axisLabelWidth: 235,
+        axisLabelFontSize: 13,
+      };
+
+      anexoMentalChart = await generateRadarChart(computedResults.anexoMental, {
+        chartConfig,
+      });
+    }
+
     let result = await generateBase(chart, reportToGenerate, computedResults, {
       symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
-      mentalChart: null,
+      mentalChart: `data:image/jpg;base64,${anexoMentalChart}`,
     });
 
     return res.status(200).json({

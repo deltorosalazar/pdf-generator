@@ -38,7 +38,7 @@ const fisicoADN = (results, reportToGenerate) => {
   const percentages = labels.map((_, index) => (parseInt(values[index]) / maxValues[index]).toFixed(2))
   const wellnessQuotient = sumArrayValues(values) / sumArrayValues(maxValues)
 
-  console.log({labels, values, maxValues, percentages, wellnessQuotient});
+  // console.log({labels, values, maxValues, percentages, wellnessQuotient});
 
   return {
     date: numericValues['Fecha'],
@@ -278,12 +278,6 @@ const reporteMaika = (results) => {
   })
   const wellnessQuotient = sumArrayValues(valoresFinales) / valoresFinales.length * 5
 
-  // console.log({
-  //   porcentajeRealSobreTope,
-  //   percentages,
-  //   valoresFinales
-  // });
-
   return {
     date: sintomas['Fecha'],
     labels,
@@ -300,13 +294,24 @@ const reporteMaika = (results) => {
       values: sintomasPorSeccion.slice(1).map(symptoms => getArrayAverage(symptoms)),
       maxValues: sintomasPorSeccion.slice(1).map(_ => 5),
       labels: symptomsLabels.slice(1)
+    },
+    anexoMental: {
+      values: [
+        100 - (sumasPorCuestionario[3] / 56) * 100,
+        100 - (sumasPorCuestionario[2] / 21) * 100,
+        100 - (sumasPorCuestionario[6] / 27) * 100
+      ],
+      maxValues: sintomasPorSeccion.slice(1).map(_ => 100),
+      labels: [
+        'Estrés', 'Ansiedad', 'Depresión'
+      ]
     }
   }
 }
 
 const reporte360 = (results, reportToGenerate) => {
   // console.log(results);
-  console.log({reportToGenerate});
+  // console.log({reportToGenerate});
   const resultadosReporteMaika = reporteMaika(results)
   const ponderacionReporteMaika = resultadosReporteMaika.percentages
 
@@ -328,22 +333,21 @@ const reporte360 = (results, reportToGenerate) => {
   const relacionamientoIndex = resultadosReporteMaika.labels.indexOf['Relacionamiento']
   const esparcimientoIndex = resultadosReporteMaika.labels.indexOf['Esparcimiento']
 
-
   const propositoOficio = resultadosReporteMaika.percentages[propositoOficioIndex] * 5 // Valor Final
   const depresion = resultadosReporteMaika.percentages[depresionIndex] * 5 // Valor Final
   const relacionamiento = resultadosReporteMaika.percentages[relacionamientoIndex] * 5 // Valor Final
   const esparcimiento = resultadosReporteMaika.percentages[esparcimientoIndex] * 5 // Valor Final
 
-  console.log({
-    nivelEnergia,
-    saludFisica,
-    estresAnsiedad,
-    capacidadMental,
-    propositoOficio,
-    depresion,
-    relacionamiento,
-    esparcimiento,
-  });
+  // console.log({
+  //   nivelEnergia,
+  //   saludFisica,
+  //   estresAnsiedad,
+  //   capacidadMental,
+  //   propositoOficio,
+  //   depresion,
+  //   relacionamiento,
+  //   esparcimiento,
+  // });
 
   const labels = ['Nivel Energía', 'Salud Física', 'Estrés/Ansiedad', 'Capacidad Mental ', 'Propósito en Oficio', 'Depresión', 'Relacionamiento', 'Esparcimiento']
 
