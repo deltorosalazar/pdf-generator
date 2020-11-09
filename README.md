@@ -5,6 +5,22 @@
 npm install
 ```
 
+- Si se desea corre localmente y NO usar Docker, instalar las siguientes dependencias:
+
+*Linux*
+```
+apt-get install imagemagick librsvg2-dev
+```
+
+*MacOS*
+```
+brew install imagemagick librsvg
+```
+
+*Windows*
+Revisar este repositorio.
+https://www.npmjs.com/package/anychart-nodejs
+
 - Iniciar el servidor
 ```
 npm start
