@@ -30,10 +30,10 @@ const REPORTS = {
       FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA
     ],
     hero: 'REPORTE_METODO_MAIKA',
-    infography: 'metodoMaika',
     id: 'REPORTE_METODO_MAIKA',
+    infography: 'metodoMaika',
     template: 'REPORTE_METODO_MAIKA.html',
-    title: 'Título por Confirmar',
+    title: 'Resumen',
   },
   REPORTE_TOTAL_CON_ADN: {
     chartConfig: {
@@ -53,9 +53,11 @@ const REPORTS = {
       FORMULARIO_MEDICO_FILTRO_ADN_FISICO,
       FORMULARIO_MEDICO_FILTRO_ADN_MENTE,
     ],
+    hero: 'REPORTE_TOTAL_CON_ADN',
     id: 'REPORTE_TOTAL_CON_ADN',
-    template: 'REPORTE_FISICO_ADN.html',
-    title: 'Resumen Valoración'
+    infography: 'metodoMaika',
+    template: 'REPORTE_TOTAL_CON_ADN.html',
+    title: 'Resumen'
   },
   REPORTE_FISICO_ADN: {
     chartConfig: {

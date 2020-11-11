@@ -244,7 +244,7 @@ const reporteMaika = (results) => {
   const topes = [20, 288, 21, 56, 32, 5, 27, 15, 10]
   const sumasPorCuestionario = [
     sumArrayValues(sintomasPorSeccion[3]),
-    sumArrayValues( Array.from(Array(16), (_, __) => '').map((_, index) => sumArrayValues(sintomasPorSeccion[index]))),
+    sumArrayValues(Array.from(Array(16), (_, __) => '').map((_, index) => sumArrayValues(sintomasPorSeccion[index]))),
     sumArrayValues(transtornoAnsiedad),
     (estresPercibido.reduce((prev, curr, index) => {
       if ([3, 4, 5, 6, 8, 9, 12].includes(index)) {
@@ -259,6 +259,7 @@ const reporteMaika = (results) => {
     sumArrayValues(sintomasPorSeccion[16]),
     sumArrayValues(sintomasPorSeccion[17]),
   ]
+
   const porcentajeRealSobreTope = sumasPorCuestionario.map((valorSuma, index) => {
     return (valorSuma / topes[index]).toFixed(2)
   })
@@ -273,9 +274,11 @@ const reporteMaika = (results) => {
     (Math.abs(porcentajeRealSobreTope[7])),
     (Math.abs(porcentajeRealSobreTope[8])),
   ]
+
   const valoresFinales = percentages.map((valor) => {
     return valor * 5
   })
+
   const wellnessQuotient = sumArrayValues(valoresFinales) / valoresFinales.length * 5
 
   return {
@@ -310,49 +313,104 @@ const reporteMaika = (results) => {
 }
 
 const reporte360 = (results, reportToGenerate) => {
-  // console.log(results);
-  // console.log({reportToGenerate});
+  // RESULTADOS REPORTE MAIKA
   const resultadosReporteMaika = reporteMaika(results)
   const ponderacionReporteMaika = resultadosReporteMaika.percentages
+  const reporteMaikaIndexes = {
+    nivelEnergiaIndex: resultadosReporteMaika.labels.indexOf('Nivel Energía'),
+    saludFisicaIndex: resultadosReporteMaika.labels.indexOf('Salud Física'),
+    estresAnsiedadIndex: resultadosReporteMaika.labels.indexOf('Estrés/Ansiedad'),
+    capacidadMentalIndex: resultadosReporteMaika.labels.indexOf('Capacidad Mental '), /// ESTA TIENE UN ESPACIO,
+    propositoOficioIndex: resultadosReporteMaika.labels.indexOf('Propósito en Oficio'),
+    depresionIndex: resultadosReporteMaika.labels.indexOf('Depresión'),
+    relacionamientoIndex: resultadosReporteMaika.labels.indexOf('Relacionamiento'),
+    esparcimientoIndex: resultadosReporteMaika.labels.indexOf('Esparcimiento')
+  }
+  const valoresReporteMaika = {
+    nivelEnergia: resultadosReporteMaika.values[reporteMaikaIndexes.nivelEnergiaIndex],
+    saludFisica: resultadosReporteMaika.values[reporteMaikaIndexes.saludFisicaIndex],
+    estresAnsiedad: resultadosReporteMaika.values[reporteMaikaIndexes.estresAnsiedadIndex],
+    capacidadMental: resultadosReporteMaika.values[reporteMaikaIndexes.capacidadMentalIndex],
+    propositoOficio: resultadosReporteMaika.values[reporteMaikaIndexes.propositoOficioIndex],
+    depresion: resultadosReporteMaika.values[reporteMaikaIndexes.depresionIndex],
+    relacionamiento: resultadosReporteMaika.values[reporteMaikaIndexes.relacionamientoIndex],
+    esparcimiento: resultadosReporteMaika.values[reporteMaikaIndexes.esparcimientoIndex]
+  }
 
-  const resultadosFisicoADN = fisicoADN([results[6], results[0]], REPORTS.REPORTE_FISICO_ADN)
-  const fatigaIndex = resultadosFisicoADN.labels.indexOf('Fatiga')
+  // RESULTADOS FISICO ADN
+  const resultadosFisicoAdn = fisicoADN([results[6], results[0]], REPORTS.REPORTE_FISICO_ADN)
+  const resultadosFisicoAdnIndexes = {
+    fatigaIndex: resultadosFisicoAdn.labels.indexOf('Fatiga'),
+  }
+  const valoresFisicoAdn = {
+    nivelEnergia: resultadosFisicoAdn.values[resultadosFisicoAdnIndexes.fatigaIndex],
+    saludFisica: resultadosFisicoAdn.wellnessQuotient * 5,
+  }
 
-  const nivelEnergia = resultadosFisicoADN.percentages[fatigaIndex] * 5 // Valor Final
-  const saludFisica = resultadosFisicoADN.wellnessQuotient * 5 // Valor Final
-
-  const resultadosMenteADN = fisicoADN([results[7], results[1]], REPORTS.REPORTE_MENTAL_ADN)
-  const estresAnsiedadIndex = resultadosMenteADN.labels.indexOf('Estrés & Ansiedad')
-  const habilidadCognitivaIndex = resultadosMenteADN.labels.indexOf('Habilidad Cognitiva')
-
-  const estresAnsiedad = resultadosMenteADN.percentages[estresAnsiedadIndex] * 5 // Valor Final
-  const capacidadMental = resultadosMenteADN.percentages[habilidadCognitivaIndex] * 5 // Valor Final
-
-  const propositoOficioIndex = resultadosReporteMaika.labels.indexOf['Propósito en Oficio']
-  const depresionIndex = resultadosReporteMaika.labels.indexOf['Depresión']
-  const relacionamientoIndex = resultadosReporteMaika.labels.indexOf['Relacionamiento']
-  const esparcimientoIndex = resultadosReporteMaika.labels.indexOf['Esparcimiento']
-
-  const propositoOficio = resultadosReporteMaika.percentages[propositoOficioIndex] * 5 // Valor Final
-  const depresion = resultadosReporteMaika.percentages[depresionIndex] * 5 // Valor Final
-  const relacionamiento = resultadosReporteMaika.percentages[relacionamientoIndex] * 5 // Valor Final
-  const esparcimiento = resultadosReporteMaika.percentages[esparcimientoIndex] * 5 // Valor Final
-
-  // console.log({
-  //   nivelEnergia,
-  //   saludFisica,
-  //   estresAnsiedad,
-  //   capacidadMental,
-  //   propositoOficio,
-  //   depresion,
-  //   relacionamiento,
-  //   esparcimiento,
-  // });
+  // RESULTADOS MENTE ADN
+  const resultadosMenteAdn = fisicoADN([results[7], results[1]], REPORTS.REPORTE_MENTAL_ADN)
+  const resultadosMenteAdnIndexes = {
+    estresAnsiedadIndex: resultadosMenteAdn.labels.indexOf('Estrés & Ansiedad'),
+    habilidadCognitivaIndex: resultadosMenteAdn.labels.indexOf('Habilidad Cognitiva'),
+    depresionIndex: resultadosMenteAdn.labels.indexOf('Depresión'),
+    relacionamientoIndex: resultadosMenteAdn.labels.indexOf('Relacionamiento'),
+  }
+  const valoresMenteAdn = {
+    estresAnsiedad: resultadosMenteAdn.values[resultadosMenteAdnIndexes.estresAnsiedadIndex],
+    capacidadMental: resultadosMenteAdn.values[resultadosMenteAdnIndexes.habilidadCognitivaIndex],
+    depresion: resultadosMenteAdn.values[resultadosMenteAdnIndexes.depresionIndex],
+    relacionamiento: resultadosMenteAdn.values[resultadosMenteAdnIndexes.relacionamientoIndex],
+  }
 
   const labels = ['Nivel Energía', 'Salud Física', 'Estrés/Ansiedad', 'Capacidad Mental ', 'Propósito en Oficio', 'Depresión', 'Relacionamiento', 'Esparcimiento']
 
-  // TODO: Check if this value is the same for all form results.
-  const offsetIndexes = 4
+  const values = [
+    (valoresReporteMaika.nivelEnergia * .5) + (valoresFisicoAdn.nivelEnergia * .5),
+    (valoresReporteMaika.saludFisica * .5) + (valoresFisicoAdn.saludFisica * .5),
+    (valoresReporteMaika.estresAnsiedad * .5) + (valoresMenteAdn.estresAnsiedad * .5),
+    (valoresReporteMaika.capacidadMental * .5) + (valoresMenteAdn.capacidadMental * .5),
+    0,
+    (valoresReporteMaika.depresion * .5) + (valoresMenteAdn.depresion * .5),
+    (valoresReporteMaika.relacionamiento * .5) + (valoresMenteAdn.relacionamiento * .5),
+    0
+  ]
+
+  const percentages = [
+    (values[0] / 5).toFixed(2),
+    (values[1] / 5).toFixed(2),
+    (values[2] / 5).toFixed(2),
+    (values[3] / 5).toFixed(2),
+    (values[4] / 5).toFixed(2),
+    (values[5] / 5).toFixed(2),
+    (values[6] / 5).toFixed(2),
+    (values[7] / 5).toFixed(2),
+  ]
+
+  console.log({
+    // resultadosReporteMaika,
+    // valoresReporteMaika,
+    // valoresFisicoAdn,
+    // valoresMenteAdn,
+    percentages,
+    // valoresReporteMaika: valoresReporteMaika.saludFisica,
+    // valoresFisicoAdn: valoresFisicoAdn.saludFisica
+    // resultadosReporteMaika,
+    // resultadosFisicoAdn
+  });
+
+  return {
+    date: resultadosFisicoAdn['date'],
+    labels,
+    values,
+    maxValues: Array.from(Array(labels.length), (_, __) => 6),
+    patientName: resultadosFisicoAdn['patientName'],
+    recomendations: [
+      resultadosMenteAdn.recomendations[0],
+      resultadosFisicoAdn.recomendations[0],
+    ],
+    // // wellnessQuotient,
+    percentages
+  }
 }
 
 const functionByReport = {

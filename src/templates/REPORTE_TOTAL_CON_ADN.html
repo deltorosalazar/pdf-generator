@@ -22,35 +22,32 @@
       <div class="chart-wrapper">
         <img src="{{chart}}" width="100%">
         <div class="results-wrapper">
-          <table class="results-wrapper__table" >
+          <table class="results-wrapper__table">
             <tbody>
               {{#each labels}}
-                <tr>
-                  <td style="width: 130px">{{this}}</td>
-                </tr>
+              <tr>
+                <td style="width: 130px">{{this}}</td>
+              </tr>
               {{/each}}
             </tbody>
           </table>
           <table class="results-wrapper__table">
             <tbody>
-              {{#each valoresPonderados}}
-                <tr>
-                  <td
-                    style="width: 30px"
-                    class="{{setColor this}}"
-                  >
-                    &nbsp;
-                  </td>
-                </tr>
+              {{#each percentages}}
+              <tr>
+                <td style="width: 30px" class="{{setColor this}}">
+                  &nbsp;
+                </td>
+              </tr>
               {{/each}}
             </tbody>
           </table>
           <table class="results-wrapper__table">
             <tbody>
-              {{#each valoresPonderados}}
-                <tr>
-                  <td>{{this}}</td>
-                </tr>
+              {{#each percentages}}
+              <tr>
+                <td>{{this}}</td>
+              </tr>
               {{/each}}
             </tbody>
           </table>
@@ -59,9 +56,37 @@
     </div>
   </section>
   <section class="page">
-    <h1>Recomendaciones Fisico</h1>
+    <h1>Evaluación Integral y Recomendaciones</h1>
+    <p class="paragraph">
+      Tu calidad de vida depende en gran medida de tu bienestar y tu cociente de bienestar se mide en relación a las
+      siguientes dimensiones:
+    </p>
+    <ul>
+      <li>Bienestar Físico</li>
+      <li>Bienestar Mental</li>
+      <li>Bienestar Emocional</li>
+      <li>Bienestar Social</li>
+    </ul>
+
+    <p class="paragraph">
+      Teniendo esto en cuenta podrás identificar en la gráfica qué áreas requieren tu atención pues se encuentran por
+      debajo del 60% en la escala porcentual.
+    </p>
+
+    <p class="paragraph">
+      Un buen balance de vida es fundamental para incrementar tu cociente de bienestar. Sigue las instrucciones de tus
+      médicos Maika con el fin de gestionar tu salud en los próximos 12 meses y así mejorar tu calidad de vida.
+    </p>
+
+    <p>El conocimiento es la mejor medicina</p>
+
+    <p>Maika es prevención 100%</p>
+
+    <hr>
+
+    <h1>Detalles Evaluación Física en Maika App</h1>
     <p class="paragraph">{{recomendations.[0]}}</p>
-    <h1>Recomendaciones Mente</h1>
+    <h1>Detalles Evaluación Mental / Social / Emocional en Maika App</h1>
     <p class="paragraph">{{recomendations.[1]}}</p>
   </section>
   <section class="page">
