@@ -76,25 +76,6 @@ const generateRadarChart = async (computedResults, reportToGenerate) => {
   // });
 
   return Promise.resolve(base64data)
-
-  // .then(function (image) {
-  //   let buff = Buffer.from(image)
-  //   let base64data = buff.toString('base64')
-  //   // console.log(base64data)
-
-  //   return Promise.resolve(base64data)
-
-  //   // fs.writeFile('anychart.jpg', image, function (fsWriteError) {
-  //   //   if (fsWriteError) {
-  //   //     console.log(fsWriteError);
-  //   //   } else {
-  //   //     console.log('Complete');
-  //   //   }
-  //   // });
-  // }, function (generationError) {
-  //   console.log(generationError);
-  // });
-
 }
 
 module.exports = generateRadarChart

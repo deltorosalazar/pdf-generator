@@ -1,10 +1,12 @@
 const { REPORTS } = require('../../shared/constants')
 
-const sumArrayValues = (array) => {
+const sumArrayValues = (array, convertToInt = true) => {
   if (!array.length) return 0;
 
+  const fn = convertToInt ? parseInt : parseFloat
+
   return array.reduce((prev, curr) => {
-    return parseInt(prev) + parseInt(curr)
+    return fn(prev) + fn(curr)
   }, 0)
 }
 
@@ -337,6 +339,23 @@ const reporte360 = (results, reportToGenerate) => {
     esparcimiento: resultadosReporteMaika.values[reporteMaikaIndexes.esparcimientoIndex]
   }
 
+  const sintomasIndexes = {
+    propositoOficioIndex: resultadosReporteMaika.symptoms.labels.indexOf('Otros Propósito en tu oficio'),
+    esparcimientoIndex: resultadosReporteMaika.symptoms.labels.indexOf('Otros Espacios de Esparcimiento/Hobbies')
+  }
+
+  const valoresSintomas = {
+    propositoOficio: resultadosReporteMaika.symptoms.values[sintomasIndexes.propositoOficioIndex],
+    esparcimiento: resultadosReporteMaika.symptoms.values[sintomasIndexes.esparcimientoIndex]
+  }
+
+  // console.log({
+    // sintomasIndexes,
+    // labels: resultadosReporteMaika.symptoms.labels,
+    // labels: resultadosReporteMaika.symptoms.values,
+    // valoresSintomas
+  // })
+
   // RESULTADOS FISICO ADN
   const resultadosFisicoAdn = fisicoADN([results[6], results[0]], REPORTS.REPORTE_FISICO_ADN)
   const resultadosFisicoAdnIndexes = {
@@ -369,10 +388,10 @@ const reporte360 = (results, reportToGenerate) => {
     (valoresReporteMaika.saludFisica * .5) + (valoresFisicoAdn.saludFisica * .5),
     (valoresReporteMaika.estresAnsiedad * .5) + (valoresMenteAdn.estresAnsiedad * .5),
     (valoresReporteMaika.capacidadMental * .5) + (valoresMenteAdn.capacidadMental * .5),
-    0,
+    (valoresReporteMaika.propositoOficio * .5) + (valoresSintomas.propositoOficio * .5),
     (valoresReporteMaika.depresion * .5) + (valoresMenteAdn.depresion * .5),
     (valoresReporteMaika.relacionamiento * .5) + (valoresMenteAdn.relacionamiento * .5),
-    0
+    (valoresReporteMaika.esparcimiento * .5) + (valoresSintomas.esparcimiento * .5),
   ]
 
   const percentages = [
@@ -386,17 +405,27 @@ const reporte360 = (results, reportToGenerate) => {
     (values[7] / 5).toFixed(2),
   ]
 
-  console.log({
+  const wellnessQuotient = parseInt(sumArrayValues(values, false) / (values.length * 5))
+
+  // console.log({
+  //   length: values.length,
+  //   values,
+  //   sum: sumArrayValues(values, false),
+  //   totalValues: (values.length * 5),
+  //   wq: sumArrayValues(values, false) / (values.length * 5)
+  // });
+
+  // console.log({
     // resultadosReporteMaika,
     // valoresReporteMaika,
     // valoresFisicoAdn,
     // valoresMenteAdn,
-    percentages,
+    // percentages,
     // valoresReporteMaika: valoresReporteMaika.saludFisica,
     // valoresFisicoAdn: valoresFisicoAdn.saludFisica
     // resultadosReporteMaika,
     // resultadosFisicoAdn
-  });
+  // });
 
   return {
     date: resultadosFisicoAdn['date'],
@@ -408,7 +437,7 @@ const reporte360 = (results, reportToGenerate) => {
       resultadosMenteAdn.recomendations[0],
       resultadosFisicoAdn.recomendations[0],
     ],
-    // // wellnessQuotient,
+    wellnessQuotient,
     percentages
   }
 }

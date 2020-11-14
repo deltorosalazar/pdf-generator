@@ -35,8 +35,8 @@ Para generar un reporte, es necesario enviar un identificador único
 |         |REPORTE_MENTAL_ADN
 |         |REPORTE_FISICO_ADN
 |         |REPORTE_MEDS_ADN
-|         |REPORTE_MENTAL_ADN
-|         |REPORTE_MENTAL_ADN
+|         |REPORTE_METODO_MAIKA
+|         |REPORTE_TOTAL_CON_ADN
 
 - Enviar una petición POST de la siguiente manera
 
