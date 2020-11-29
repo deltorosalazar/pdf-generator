@@ -35,6 +35,7 @@ const generatePdf = (chart, reportToGenerate, results, otherCharts, saveToS3) =>
       reportToGenerate.infography &&
       require(`../../templates/assets/${reportToGenerate.infography}`),
     percentages: results.percentages,
+    symptomsTable: results.symptomsTable,
     ...otherCharts
   });
 

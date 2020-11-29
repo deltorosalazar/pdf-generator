@@ -14,13 +14,17 @@
     </div>
     <h1>{{title}}</h1>
     <p>Haz dado el primer paso para mejorar tu calidad de vida, ajustar tus hábitos permitiendo prevenir futuras enfermedades crónicas y potenciar tu bienestar.</p>
-    <p>{{patientName}}, tu cociente de bienestar está ponderado con la información de ADN y el resultado es de {{wellnessQuotient}}%</p>
+    <p><b>{{patientName}}</b>, tu cociente de bienestar está ponderado con la información de ADN y el resultado es de <b>{{wellnessQuotient}}%</b></p>
     <div class="images-wrapper">
       <div class="infography-wrapper">
         <img src="{{infography}}" class="infography">
       </div>
       <div class="chart-wrapper">
         <img src="{{chart}}" width="100%">
+        <div class="conventions-wrapper">
+          <p>5: Mejor Resultado</p>
+          <p>0: Peor Resultado</p>
+        </div>
         <div class="results-wrapper">
           <table class="results-wrapper__table">
             <tbody>
@@ -82,7 +86,7 @@
 
     <p>Maika es prevención 100%</p>
 
-    <hr>
+    <hr class="separator">
 
     <h1>Detalles Evaluación Física en Maika App</h1>
     <p class="paragraph">{{recomendations.[0]}}</p>
@@ -121,6 +125,11 @@
 
 </body>
 <style>
+  * {
+    box-sizing: border-box;
+    border: none !important;
+  }
+
   .page {
     min-height: 279mm;
     border: 1px solid purple;
@@ -167,6 +176,10 @@
     width: 100%;
   }
 
+  .separator {
+    border: 1px solid black !important;
+  }
+
   .chart-wrapper {
     border: 1px solid black;
     width: 55%;
@@ -179,7 +192,16 @@
   }
 
   table, td, th {
+    border: 1px solid black !important;
+  }
+
+  .conventions-wrapper {
     border: 1px solid black;
+    padding: 0 8px;
+  }
+
+  .conventions-wrapper p {
+    margin: 0;
   }
 
   .results-wrapper__table {

@@ -294,10 +294,14 @@ const reporteMaika = (results) => {
       recomendacionesAdnFisico
     ],
     wellnessQuotient,
-    percentages: percentages,
+    percentages: percentages.map(percentage => parseInt(percentage * 100) ),
     symptoms: {
       values: sintomasPorSeccion.slice(1).map(symptoms => getArrayAverage(symptoms)),
       maxValues: sintomasPorSeccion.slice(1).map(_ => 5),
+      labels: symptomsLabels.slice(1)
+    },
+    symptomsTable: {
+      values: sintomasPorSeccion.slice(1).map(symptoms => getArrayAverage(symptoms)),
       labels: symptomsLabels.slice(1)
     },
     anexoMental: {
@@ -438,7 +442,7 @@ const reporte360 = (results, reportToGenerate) => {
       resultadosFisicoAdn.recomendations[0],
     ],
     wellnessQuotient,
-    percentages
+    percentages: percentages.map(percentage => parseInt(percentage * 100))
   }
 }
 

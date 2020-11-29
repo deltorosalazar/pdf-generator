@@ -39,7 +39,7 @@ const REPORTS = {
     chartConfig: {
       axisLabelHeight: 50,
       axisLabelWidth: 115,
-      axisLabelFontSize: 12,
+      axisLabelFontSize: 18,
     },
     forms: [
       // The same forms as the report above. 👆🏽👆🏽
