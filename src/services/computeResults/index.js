@@ -409,13 +409,15 @@ const reporte360 = (results, reportToGenerate) => {
     (values[7] / 5).toFixed(2),
   ]
 
-  const wellnessQuotient = parseInt(sumArrayValues(values, false) / (values.length * 5))
+  const wellnessQuotient = parseFloat(sumArrayValues(values, false) / (values.length * 5)).toFixed(2)
 
   // console.log({
   //   length: values.length,
   //   values,
   //   sum: sumArrayValues(values, false),
   //   totalValues: (values.length * 5),
+  //   ll: sumArrayValues(values, false),
+  //   pp: (values.length * 5),
   //   wq: sumArrayValues(values, false) / (values.length * 5)
   // });
 
