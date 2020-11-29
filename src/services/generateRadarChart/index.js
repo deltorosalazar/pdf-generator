@@ -54,10 +54,10 @@ const generateRadarChart = async (computedResults, reportToGenerate) => {
   chart.xAxis().labels().hAlign(reportToGenerate.chartConfig.hAlign)
 
 
-  chart.line(data1).name('Base').markers({size: 5, fill: '#004400', type: 'circle', zIndex: 40})
-  chart.line(data1).stroke({color: '#008000', thickness: 5, lineCap: 'round'})
-  chart.line(data2).name('Paciente').markers({size: 5, fill: '#47001d', type: 'circle', zIndex: 40})
-  chart.line(data2).stroke({color: '#800033', thickness: 5, lineCap: 'round'})
+  chart.line(data1).name('Base').markers({size: 5, fill: '#f74e01', type: 'circle', zIndex: 40})
+  chart.line(data1).stroke({color: '#f47136', thickness: 5, lineCap: 'round'})
+  chart.line(data2).name('Paciente').markers({size: 5, fill: '#6739f6', type: 'circle', zIndex: 40})
+  chart.line(data2).stroke({color: '#7b52fb', thickness: 5, lineCap: 'round'})
   chart.container('container');
   chart.draw();
 

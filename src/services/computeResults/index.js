@@ -294,7 +294,7 @@ const reporteMaika = (results) => {
       recomendacionesAdnFisico
     ],
     wellnessQuotient,
-    percentages,
+    percentages: percentages,
     symptoms: {
       values: sintomasPorSeccion.slice(1).map(symptoms => getArrayAverage(symptoms)),
       maxValues: sintomasPorSeccion.slice(1).map(_ => 5),
