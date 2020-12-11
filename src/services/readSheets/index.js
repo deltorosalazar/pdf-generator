@@ -1,4 +1,9 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+const {
+  GOOGLE_API_QUOTA_EXCEEDED,
+  MAIKA_RECORD_NOT_FOUND
+} = require("../../shared/constants/error_codes");
+const MaikaError = require("../../shared/MaikaError");
 
 const init = async (patientID, reportToGenerate) => {
   const parsedID = patientID.toString();
@@ -8,42 +13,53 @@ const init = async (patientID, reportToGenerate) => {
       return readSheet(form, parsedID);
     })
   ).catch(function (err) {
-    console.log("A promise failed to resolve", err);
-    return new Error(err.message);
+    return Promise.reject(err)
   });
 
   return formNames;
 };
 
 const readSheet = async (formID, patientID) => {
+  const spreadsheet = new GoogleSpreadsheet(formID);
+
+  await spreadsheet.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  });
+
+  await spreadsheet.loadInfo();
+
+  const sheet = spreadsheet.sheetsByIndex[0];
+
+  let rows = []
+
   try {
-    const spreadsheet = new GoogleSpreadsheet(formID);
-
-    await spreadsheet.useServiceAccountAuth({
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    rows = await sheet.getRows();
+  } catch (error) {
+    throw new MaikaError({
+      code: GOOGLE_API_QUOTA_EXCEEDED,
+      message: 'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',
+      data: null
     });
-
-    await spreadsheet.loadInfo();
-
-    const sheet = spreadsheet.sheetsByIndex[0];
-    const rows = await sheet.getRows();
-
-    if (!rows.length) {
-      // Improve the way the errors are being handled. 👀
-      throw new Error(`No hay registros en el formulario ${formID}`);
-    }
-
-    return getRowsByField(
-      sheet,
-      rows,
-      "Documento de Identidad Paciente",
-      patientID
-    );
-  } catch (e) {
-    // Improve the way the errors are being handled. 👀
-    throw new Error(e.message, `No hay registros en el formulario ${formID}`);
   }
+
+  if (!rows.length) {
+    throw new MaikaError({
+      code: MAIKA_EMPTY_FORM,
+      message: `No hay registros en el formulario ${formID}`,
+      data: {
+        received: formID,
+        expected: null
+      }
+    });
+  }
+
+  return await getRowsByField(
+    sheet,
+    rows,
+    "Documento de Identidad Paciente",
+    patientID
+  );
 };
 
 /**
@@ -53,14 +69,21 @@ const readSheet = async (formID, patientID) => {
  * @param {*} field
  * @param {*} value
  */
-const getRowsByField = (sheet, rows, field, value) => {
+const getRowsByField = async (sheet, rows, field, value) => {
   const { headerValues } = sheet;
   const records = rows.filter(
     (row) => row[field].toString() === value.toString()
   );
 
   if (!records.length) {
-    throw new Error(`No se encontro un registro con ese ID ${value}`);
+    throw new MaikaError({
+      code: MAIKA_RECORD_NOT_FOUND,
+      message: `No se encontró un registro con ID ${value}`,
+      data: {
+        received: value,
+        expected: null
+      }
+    })
   }
 
   const lastRecord = records.pop();

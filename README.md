@@ -28,7 +28,7 @@ npm start
 
 ### Cómo Generar un PDF
 
-Para generar un reporte, es necesario enviar un identificador único
+Para generar un reporte, es necesario enviar un identificador único dependiendo el reporte que se quiera generar.
 
 | Reporte | Identificador del Reporte |
 |---------|---------------------------|
@@ -38,7 +38,7 @@ Para generar un reporte, es necesario enviar un identificador único
 |         |REPORTE_METODO_MAIKA
 |         |REPORTE_TOTAL_CON_ADN
 
-- Enviar una petición POST de la siguiente manera
+- Enviar una petición POST de la siguiente manera:
 
 ```
 curl \
@@ -50,7 +50,7 @@ curl \
 
 **id_del_reporte:** Es la id del paciente.
 
-Por ejemplo
+Por ejemplo:
 
 ```
 curl \
@@ -58,6 +58,62 @@ curl \
   -H "Content-Type: application/json" \
   -X POST http://localhost:4000
 ```
+
+A partir esta peticion se recibe el siguiente objeto:
+```
+{
+  "message": 'ok',
+  "file": "<base64_encoded>",
+  "metadata:": {
+    "date": "10/1/2020",
+    "id": "1870820221",
+    "report": "REPORTE_FISICO_ADN",
+    "patientName": "Nombre del Paciente"
+  }
+}
+```
+
+El Base64 obtenido en llave `file` es el que se usa para generar el archivo PDF en `S3`.
+
+En caso de fallar se pueden recibir los siguientes errores:
+
+- Si se ha excedido la cuota del API de Google:
+```
+{
+  code: 'Google API / Quota Exceeded',
+  message: 'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',,
+  data: null
+}
+```
+
+- Si no hay resultados en la spreadsheet:
+```
+{
+  code: 'Maika / No Form Responses',
+  message: `No hay registros en el formulario ${formID}`,
+  data: {
+    received: formID,
+    expected: null
+  }
+}
+```
+
+- Si dentro de los resultados no se encuentra un registro con el ID enviado:
+```
+{
+  code: 'Maika / Record Not Found',
+  message: `No se encontró un registro con ID ${value}`,
+  data: {
+    received: value,
+    expected: null
+  }
+}
+```
+
+**CONSIDERACIONES**
+1. Debido a que los datos son guardados en en Hojas de Calculo de Google, no se da garantía si esos datos se encuentran mal escritos, desordenados, mal formateados, entre otros.
+2. Es de gran importancia NO cambiar el nombre de los campos que actualmente existen ya que los nombres de estos sirven como llaves para su correcta identificación. El cambio de alguno de estos puede causar una falla en el proceso de generación de los PDF.
+
 
 ### Ejecutar en producción
 ```
@@ -100,8 +156,9 @@ docker container rm maika-pdf
 ```
 docker container logs maika-pdf
 ```
-
+```
 docker stop maika-pdf && \
 docker container rm maika-pdf && \
 docker build --tag maika-pdf-image-ubuntu-1604 . && \
 docker run --publish 4000:4000 --name maika-pdf maika-pdf-image-ubuntu-1604
+```

@@ -47,67 +47,21 @@ const generateBase = (
   // wkhtmltopdf(resultHtml, options)
   //     .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
 
+  const a = wkhtmltopdf(resultHtml, { pageSize: 'letter' });
+
   return new Promise(async (resolve, reject) => {
-    await wkhtmltopdf(resultHtml, options, function (error, stream) {
-      if (error) return reject(error);
+    toArray(a)
+      .then(function (parts) {
+        const buffers = parts.map((part) =>
+          Buffer.isBuffer(part) ? part : Buffer.from(part)
+        );
 
-      return toArray(stream)
-        .then(function (parts) {
-          const buffers = parts.map((part) =>
-            Buffer.isBuffer(part) ? part : Buffer.from(part)
-          );
+        let generatedBuffer = Buffer.concat(buffers);
 
-          let generatedBuffer = Buffer.concat(buffers);
-          resolve(generatedBuffer.toString("base64"));
-        })
-        .catch(reject);
-    });
-  });
-
-  // return new Promise(async (resolve, reject) => {
-  // var stream = wkhtmltopdf(fs.createReadStream('test.pdf'))
-
-  // console.log(stream);
-
-  // .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
-
-  // wkhtmltopdf(resultHtml, options, function (error, stream) {
-  //   if (error) return reject(error)
-
-  //   console.log(stream);
-
-  // return toArray(stream)
-  //   .then(function (parts) {
-  //     const buffers = parts.map((part) =>
-  //       Buffer.isBuffer(part) ? part : Buffer.from(part)
-  //     );
-  //     let generatedBuffer = Buffer.concat(buffers);
-
-  //     resolve(generatedBuffer)
-  //   })
-  //   .catch(reject)
-  // });
-
-  // await S3.getInstance()
-  //   .putObject({
-  //     Body: stream,
-  //     Bucket: process.env.PDF_BUCKET	,
-  //     ACL: "private",
-  //     ContentType: "application/pdf",
-  //     Key: key,
-  //     ContentDisposition: "attachment",
-  //   })
-  //   .promise()
-
-  // return S3.getInstance().getSignedUrl("getObject", {
-  //   Bucket: config.s3.upload,
-  //   Key: key,
-  //   Expires: 900,
-  // });
-
-  // resolve()
-  //resolve("generated pdf");
-  // });
+        resolve(generatedBuffer.toString("base64"));
+      })
+      .catch(reject);
+  })
 };
 
 module.exports = generateBase;

@@ -16,6 +16,7 @@ const {
 } = require("./services");
 
 const { REPORTS } = require("./shared/constants");
+const { log } = require("handlebars");
 
 app
   .use(helmet())
@@ -136,50 +137,47 @@ app.post("/", async function (req, res) {
 
 // Endpoint to return file in base64
 app.post("/base", async function (req, res) {
+  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
+  const mandatoryParams = ["id", "report"];
+
+  const areParamsComplete = mandatoryParams.reduce((prev, curr) => {
+    return prev && Object.keys(body).includes(curr);
+  }, true);
+
+  if (!areParamsComplete) {
+    return res.status(400).json({
+      message: "No se han enviado todos los parámetros necesarios.",
+      data: {
+        received: Object.keys(body),
+        expected: mandatoryParams,
+      },
+    });
+  }
+
+  const { id, report } = body;
+
+  const reportToGenerate = REPORTS[report];
+
+  if (!reportToGenerate) {
+    return res.status(400).json({
+      message: "Este reporte no existe.",
+      data: {
+        received: report,
+        expected: Object.keys(REPORTS),
+      },
+    });
+  }
+
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const results = await readSheets(id, reportToGenerate)
 
-    const mandatoryParams = ["id", "report"];
+    let computedResults = null
 
-    const areParamsComplete = mandatoryParams.reduce((prev, curr) => {
-      return prev && Object.keys(body).includes(curr);
-    }, true);
-
-    if (!areParamsComplete) {
-      return res.status(400).json({
-        message: "No se han enviado todos los parámetros necesarios.",
-        data: {
-          received: Object.keys(body),
-          expected: mandatoryParams,
-        },
-      });
-    }
-
-    const { id, report } = body;
-
-    const reportToGenerate = REPORTS[report];
-
-    if (!reportToGenerate) {
-      return res.status(400).json({
-        message: "Este reporte no existe.",
-        data: {
-          received: report,
-          expected: Object.keys(REPORTS),
-        },
-      });
-    }
-
-    const results = await readSheets(id, reportToGenerate);
-
-    if (results instanceof Error) throw new Error(results)
-
-    // For debugging purposes.
-    // console.log(results)
-    // return
-
-    const computedResults = await computeResults(results, reportToGenerate);
+    computedResults = await computeResults(results, reportToGenerate);
 
     const chart = await generateRadarChart(computedResults, reportToGenerate);
+
     let symptomsChart = null;
     let anexoMentalChart = null;
 
@@ -197,9 +195,9 @@ app.post("/base", async function (req, res) {
 
     if (computedResults.anexoMental) {
       const chartConfig = {
-        axisLabelHeight: 80,
-        axisLabelWidth: 235,
-        axisLabelFontSize: 13,
+        axisLabelHeight: 50,
+        axisLabelWidth: 115,
+        axisLabelFontSize: 12,
       };
 
       anexoMentalChart = await generateRadarChart(computedResults.anexoMental, {
@@ -207,24 +205,30 @@ app.post("/base", async function (req, res) {
       });
     }
 
-    let result = await generateBase(chart, reportToGenerate, computedResults, {
-      symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
-      mentalChart: `data:image/jpg;base64,${anexoMentalChart}`,
-    });
+    try {
+      let result = await generateBase(chart, reportToGenerate, computedResults, {
+        symptomsChart: `data:image/jpg;base64,${symptomsChart}`,
+        mentalChart: `data:image/jpg;base64,${anexoMentalChart}`,
+      });
 
-    return res.status(200).json({
-      message: "ok",
-      file: result,
-      metadata: {
-        date: computedResults.date,
-        id,
-        report,
-        patientName: computedResults.patientName,
-      },
-    });
+      return res.status(200).json({
+        message: "ok",
+        file: result,
+        metadata: {
+          date: computedResults.date,
+          id,
+          report,
+          patientName: computedResults.patientName,
+        },
+      });
+    } catch (error) {
+      console.log('errrro');
+    }
+
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       message: error.message,
+      data: error.data
     });
   }
 });
