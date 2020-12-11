@@ -16,7 +16,6 @@ const {
 } = require("./services");
 
 const { REPORTS } = require("./shared/constants");
-const { log } = require("handlebars");
 
 app
   .use(helmet())
