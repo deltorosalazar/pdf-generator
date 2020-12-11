@@ -36,22 +36,24 @@ const readSheet = async (formID, patientID) => {
   try {
     rows = await sheet.getRows();
   } catch (error) {
-    throw new MaikaError({
-      code: GOOGLE_API_QUOTA_EXCEEDED,
-      message: 'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',
-      data: null
-    });
+    throw new MaikaError(
+      429,
+      'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',
+      GOOGLE_API_QUOTA_EXCEEDED,
+      null
+    );
   }
 
   if (!rows.length) {
-    throw new MaikaError({
-      code: MAIKA_EMPTY_FORM,
-      message: `No hay registros en el formulario ${formID}`,
-      data: {
+    throw new MaikaError(
+      503,
+      `No hay registros en el formulario ${formID}`,
+      MAIKA_EMPTY_FORM,
+      {
         received: formID,
         expected: null
       }
-    });
+    );
   }
 
   return await getRowsByField(
@@ -76,14 +78,15 @@ const getRowsByField = async (sheet, rows, field, value) => {
   );
 
   if (!records.length) {
-    throw new MaikaError({
-      code: MAIKA_RECORD_NOT_FOUND,
-      message: `No se encontró un registro con ID ${value}`,
-      data: {
+    throw new MaikaError(
+      404,
+      `No se encontró un registro con ID ${value}`,
+      MAIKA_RECORD_NOT_FOUND,
+      {
         received: value,
         expected: null
       }
-    })
+    )
   }
 
   const lastRecord = records.pop();

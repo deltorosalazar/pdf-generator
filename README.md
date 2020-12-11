@@ -44,7 +44,7 @@ Para generar un reporte, es necesario enviar un identificador único dependiendo
 curl \
   -d '{"id": "<id_del_paciente>", "report": "<id_del_reporte>"}' \
   -H "Content-Type: application/json" \
-  -X POST http://localhost:4000
+  -X POST http://localhost:4000/base
 ```
 **id_del_paciente:** Es la cédula del paciente.
 
@@ -56,7 +56,7 @@ Por ejemplo:
 curl \
   -d '{"id": "2050820455", "report": "REPORTE_FISICO_ADN"}' \
   -H "Content-Type: application/json" \
-  -X POST http://localhost:4000
+  -X POST http://localhost:4000/base
 ```
 
 A partir esta peticion se recibe el siguiente objeto:
@@ -80,8 +80,12 @@ En caso de fallar se pueden recibir los siguientes errores:
 - Si se ha excedido la cuota del API de Google:
 ```
 {
+  timestamp: 1607717525860,
   code: 'Google API / Quota Exceeded',
-  message: 'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',,
+  status: 429,
+  messages: [
+    'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.'
+  ],
   data: null
 }
 ```
@@ -89,8 +93,12 @@ En caso de fallar se pueden recibir los siguientes errores:
 - Si no hay resultados en la spreadsheet:
 ```
 {
+  timestamp: 1607717525860,
+  status: 503,
   code: 'Maika / No Form Responses',
-  message: `No hay registros en el formulario ${formID}`,
+  messages: [
+    `No hay registros en el formulario ${formID}`
+  ],
   data: {
     received: formID,
     expected: null
@@ -101,8 +109,12 @@ En caso de fallar se pueden recibir los siguientes errores:
 - Si dentro de los resultados no se encuentra un registro con el ID enviado:
 ```
 {
+  timestamp: 1607717525860,
   code: 'Maika / Record Not Found',
-  message: `No se encontró un registro con ID ${value}`,
+  status: 404,
+  messages: [
+    `No se encontró un registro con ID ${value}`
+  ],
   data: {
     received: value,
     expected: null

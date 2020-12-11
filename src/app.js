@@ -146,7 +146,11 @@ app.post("/base", async function (req, res) {
 
   if (!areParamsComplete) {
     return res.status(400).json({
-      message: "No se han enviado todos los parámetros necesarios.",
+      timestamp: Date.now(),
+      status: 400,
+      messages: [
+        "No se han enviado todos los parámetros necesarios."
+      ],
       data: {
         received: Object.keys(body),
         expected: mandatoryParams,
@@ -160,6 +164,8 @@ app.post("/base", async function (req, res) {
 
   if (!reportToGenerate) {
     return res.status(400).json({
+      timestamp: Date.now(),
+      status: 400,
       message: "Este reporte no existe.",
       data: {
         received: report,
@@ -223,10 +229,13 @@ app.post("/base", async function (req, res) {
     } catch (error) {
       console.log('errrro');
     }
-
   } catch (error) {
-    return res.status(400).json({
-      message: error.message,
+    return res.status(error.httpStatusCode).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message,
+      ],
       data: error.data
     });
   }

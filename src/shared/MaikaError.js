@@ -1,7 +1,8 @@
 class MaikaError extends Error {
-  constructor(message, code, data) {
+  constructor(httpStatusCode, message, code, data) {
     super()
 
+    this.httpStatusCode = httpStatusCode
     this.message = message
     this.code = code
     this.data = data
