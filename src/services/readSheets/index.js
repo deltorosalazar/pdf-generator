@@ -1,5 +1,6 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const {
+  GLOBAL_ENV_VARIABLES,
   GOOGLE_API_QUOTA_EXCEEDED,
   MAIKA_RECORD_NOT_FOUND
 } = require("../../shared/constants/error_codes");
@@ -22,9 +23,27 @@ const init = async (patientID, reportToGenerate) => {
 const readSheet = async (formID, patientID) => {
   const spreadsheet = new GoogleSpreadsheet(formID);
 
+  const {
+    GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    GOOGLE_PRIVATE_KEY
+  } = process.env
+
+  if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+    throw new MaikaError(
+      400,
+      `
+        Alguna de las variables de entorno no ha sido definida.
+        GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL ? '✅' : '❌'}
+        GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY ? '✅' : '❌'}
+      `,
+      GLOBAL_ENV_VARIABLES,
+      null
+    );
+  }
+
   await spreadsheet.useServiceAccountAuth({
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   });
 
   await spreadsheet.loadInfo();
