@@ -33,8 +33,8 @@ const readSheet = async (formID, patientID) => {
       400,
       `
         Alguna de las variables de entorno no ha sido definida.
-        GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL ? '✅' : '❌'}
-        GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY ? '✅' : '❌'}
+        GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL ? 'defined' : 'undefined'}
+        GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY ? 'defined' : 'undefined'}
       `,
       GLOBAL_ENV_VARIABLES,
       null
