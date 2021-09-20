@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  <section class="page">
+    FKJLSAJKDJA;DJ
+    <!-- <h4 class="date">{{date}}</h4>
+    <div class="hero-wrapper">
+      <img src="{{hero}}" class="hero">
+    </div> -->
+  </section>
+
+</body>
+<style>
+  * {
+    box-sizing: border-box;
+    border: none !important;
+  }
+
+  .page {
+    border: 1px solid purple;
+    /* For debugging purposes. */
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 279mm;
+  }
+
+  .page:not(:last-of-type) {
+    page-break-after: always;
+  }
+
+  .date {
+    margin-bottom: 16px;
+  }
+
+  .hero-wrapper {
+    height: 300px;
+  }
+
+  .hero {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  .images-wrapper {
+    border: 1px solid black;
+    height: 600px;
+    position: relative;
+    width: 100%;
+  }
+
+  .infography-wrapper {
+    border: 1px solid red;
+    width: 35%;
+
+    position: absolute;
+    top: 50%;
+    left: 0;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+
+  .infography {
+    width: 100%;
+  }
+
+  .chart-wrapper {
+    border: 1px solid black;
+    width: 55%;
+
+    position: absolute;
+    top: 50%;
+    right: 0;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+
+  .separator {
+    border: 1px solid black !important;
+  }
+
+  .conventions-wrapper {
+    border: 1px solid black;
+    padding: 0 8px;
+  }
+
+  .conventions-wrapper p {
+    margin: 0;
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid black !important;
+  }
+
+  .results-wrapper {
+    padding: 16px;
+  }
+
+  .results-wrapper__table {
+    display: inline-block;
+    border-collapse: collapse;
+    border-spacing: 20px 0;
+  }
+
+  .results-wrapper__table td {
+    font-size: 12px;
+  }
+
+  .red {
+    background: red;
+  }
+
+  .orange {
+    background: orange;
+  }
+
+  .green {
+    background: greenyellow;
+  }
+
+  .paragraph {
+    font-size: 18px;
+  }
+
+  .footnote {
+    font-size: 12px;
+  }
+</style>
+
+</html>

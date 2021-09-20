@@ -1,56 +1,87 @@
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } = require('google-spreadsheet');
 const {
   GLOBAL_ENV_VARIABLES,
   GOOGLE_API_QUOTA_EXCEEDED,
+  MAIKA_EMPTY_FORM,
   MAIKA_RECORD_NOT_FOUND
-} = require("../../shared/constants/error_codes");
-const MaikaError = require("../../shared/MaikaError");
+} = require('../../shared/constants/error_codes');
+const MaikaError = require('../../shared/MaikaError');
 
-const init = async (patientID, reportToGenerate) => {
-  const parsedID = patientID.toString();
-
-  const formNames = await Promise.all(
-    reportToGenerate.forms.map((form) => {
-      return readSheet(form, parsedID);
-    })
-  ).catch(function (err) {
-    return Promise.reject(err)
+/**
+ *
+ * @param {GoogleSpreadsheetWorksheet} sheet
+ * @param {Array} rows
+ * @param {string} field
+ * @param {*} value
+ */
+const getRowsByField = async (sheet, rows, field, value) => {
+  const { headerValues } = sheet;
+  const records = rows.filter((row) => {
+    return row[field].toString() === value.toString();
   });
 
-  return formNames;
+  if (!records.length) {
+    throw new MaikaError(
+      404,
+      `No se encontró un registro con ID ${value}`,
+      MAIKA_RECORD_NOT_FOUND,
+      {
+        received: value,
+        expected: null
+      }
+    );
+  }
+
+  // Gets the latest record, which means the last form wass filled to that user.
+  const lastRecord = records.pop();
+  const parsedRecord = {};
+
+  headerValues.forEach((header) => {
+    parsedRecord[header] = lastRecord[header];
+  });
+
+  return parsedRecord;
 };
 
-const readSheet = async (formID, patientID) => {
-  const spreadsheet = new GoogleSpreadsheet(formID);
+/**
+ *
+ * @param {string} sheetID
+ * @param {string} patientID
+ * @returns
+ */
+const readSheet = async (sheetID, patientID) => {
+  const spreadsheet = new GoogleSpreadsheet(sheetID);
 
   const {
     GOOGLE_SERVICE_ACCOUNT_EMAIL,
     GOOGLE_PRIVATE_KEY
-  } = process.env
+  } = process.env;
 
   if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY) {
     throw new MaikaError(
       400,
-      `
-        Alguna de las variables de entorno no ha sido definida.
-        GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL ? 'defined' : 'undefined'}
-        GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY ? 'defined' : 'undefined'}
-      `,
+      'Alguna de las variables de entorno no ha sido definida.',
       GLOBAL_ENV_VARIABLES,
-      null
+      {
+        received: {
+          GOOGLE_SERVICE_ACCOUNT_EMAIL: !!GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          GOOGLE_PRIVATE_KEY: !!GOOGLE_PRIVATE_KEY
+        },
+        expected: ['GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY']
+      }
     );
   }
 
   await spreadsheet.useServiceAccountAuth({
     client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
   });
 
   await spreadsheet.loadInfo();
 
   const sheet = spreadsheet.sheetsByIndex[0];
 
-  let rows = []
+  let rows = [];
 
   try {
     rows = await sheet.getRows();
@@ -66,56 +97,54 @@ const readSheet = async (formID, patientID) => {
   if (!rows.length) {
     throw new MaikaError(
       503,
-      `No hay registros en el formulario ${formID}`,
+      `No hay registros en el formulario (${sheetID})`,
       MAIKA_EMPTY_FORM,
       {
-        received: formID,
+        received: sheetID,
         expected: null
       }
     );
   }
 
-  return await getRowsByField(
+  return getRowsByField(
     sheet,
     rows,
-    "Documento de Identidad Paciente",
+    'Documento de Identidad Paciente',
     patientID
   );
 };
 
 /**
- *
- * @param {*} sheet
- * @param {*} rows
- * @param {*} field
- * @param {*} value
+ * Reads all the required sheet based on the report.
+ * @param {string} patientID
+ * @param {Object} reportToGenerate
+ * @returns
  */
-const getRowsByField = async (sheet, rows, field, value) => {
-  const { headerValues } = sheet;
-  const records = rows.filter(
-    (row) => row[field].toString() === value.toString()
-  );
+const readSheets = async (patientID, reportToGenerate) => {
+  const parsedID = patientID.toString();
 
-  if (!records.length) {
-    throw new MaikaError(
-      404,
-      `No se encontró un registro con ID ${value}`,
-      MAIKA_RECORD_NOT_FOUND,
-      {
-        received: value,
-        expected: null
-      }
-    )
+  if (!reportToGenerate.forms) {
+    return [];
   }
 
-  const lastRecord = records.pop();
-  let parsedRecord = {};
+  const reportForms = Object.keys(reportToGenerate.forms)
 
-  headerValues.forEach((header) => {
-    parsedRecord[header] = lastRecord[header];
+  const formsResults = await Promise.all(
+    reportForms.map((form) => {
+      return readSheet(form, parsedID);
+    })
+  ).catch((err) => {
+    return Promise.reject(err);
   });
 
-  return parsedRecord;
+  const results = formsResults.reduce((resultsObject, formResult, index) => {
+    return {
+      ...resultsObject,
+      [reportForms[index]]: formResult
+    };
+  }, {});
+
+  return results;
 };
 
-module.exports = init;
+module.exports = readSheets;
