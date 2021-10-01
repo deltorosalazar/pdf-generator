@@ -30,6 +30,7 @@ const computeResults = (report, formConfig, results) => {
     'Peso / Nutrición',
     'Derma',
     'Otros Físicos',
+    // These 3 👇🏽 ARE NOT used for ReporteMaika but are used for Reporte Total 360.
     'Otros Relacionamiento',
     'Otros Espacios de Esparcimiento/Hobbies',
     'Otros Propósito en tu oficio'
@@ -153,8 +154,9 @@ const computeResults = (report, formConfig, results) => {
   ];
 
   const values = symptomsByChartSection.map((symptoms) => {
-    return ArrayUtils.getAverage(symptoms).toFixed(2);
+    return Math.ceil(((4 - ArrayUtils.getAverage(symptoms)) / 4) * 100);
   });
+
   const table = labels.map((label, index) => [label, values[index]]);
   const maxValues = labels.map((_) => formConfig.maxValue);
 

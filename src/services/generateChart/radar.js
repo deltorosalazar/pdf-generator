@@ -36,8 +36,6 @@ const generateRadarChart = async (results, chartConfig, base64 = true) => {
 
   const chart = anychart.radar();
 
-  console.log({ h: chartConfig.yScale.max });
-
   chart.bounds(
     chartConfig.bounds.x || 0,
     chartConfig.bounds.y || 0,
@@ -53,8 +51,6 @@ const generateRadarChart = async (results, chartConfig, base64 = true) => {
     });
 
   if (chartConfig.xAxis) {
-    console.log('entré');
-    console.log({ font: chartConfig.xAxis.label.fontSize });
     chartConfig.xAxis.label.width && chart.xAxis().labels().width(chartConfig.xAxis.label.width);
     chartConfig.xAxis.label.height && chart.xAxis().labels().height(chartConfig.xAxis.label.height);
     chartConfig.xAxis.label.fontSize && chart.xAxis().labels().fontSize(chartConfig.xAxis.label.fontSize);

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-const { FORMS } = require('../../../shared/constants/forms');
+const { COMPUTED_FORMS, FORMS } = require('../../../shared/constants/forms');
 const { ArrayUtils } = require('../../../shared/utils');
 
 /**
@@ -16,55 +16,73 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
-  const sintomasPorSeccion = results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS]['symptomsByChartSection'];
-  const saludPhq9 = results[FORMS.FORMULARIO_PACIENTE_SALUD_PHQ9].values;
-  const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO].values;
-  const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA].values;
+  const cocienteDeBienestarPercibido = results[COMPUTED_FORMS.COCIENTE_DE_BIENESTAR_PERCIBIDO];
+  const reporteMaikaIndexes = {
+    nivelEnergiaIndex: cocienteDeBienestarPercibido.labels.indexOf('Nivel Energía'),
+    saludFisicaIndex: cocienteDeBienestarPercibido.labels.indexOf('Salud Física'),
+    estresAnsiedadIndex: cocienteDeBienestarPercibido.labels.indexOf('Estrés/Ansiedad'),
+    capacidadMentalIndex: cocienteDeBienestarPercibido.labels.indexOf('Capacidad Mental '), /// ESTA TIENE UN ESPACIO,
+    propositoOficioIndex: cocienteDeBienestarPercibido.labels.indexOf('Propósito en Oficio'),
+    depresionIndex: cocienteDeBienestarPercibido.labels.indexOf('Depresión'),
+    relacionamientoIndex: cocienteDeBienestarPercibido.labels.indexOf('Relacionamiento'),
+    esparcimientoIndex: cocienteDeBienestarPercibido.labels.indexOf('Esparcimiento')
+  };
+
+  const valoresReporteMaika = {
+    nivelEnergia: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.nivelEnergiaIndex],
+    saludFisica: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.saludFisicaIndex],
+    estresAnsiedad: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.estresAnsiedadIndex],
+    capacidadMental: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.capacidadMentalIndex],
+    propositoOficio: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.propositoOficioIndex],
+    depresion: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.depresionIndex],
+    relacionamiento: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.relacionamientoIndex],
+    esparcimiento: cocienteDeBienestarPercibido.percentages[reporteMaikaIndexes.esparcimientoIndex]
+  };
+
+  // RESULTADOS FISICO ADN
+  const resultadosFisicoAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_FISICO];
+  const resultadosFisicoAdnIndexes = {
+    fatigaIndex: resultadosFisicoAdn.labels.indexOf('Fatiga')
+  };
+  const valoresFisicoAdn = {
+    nivelEnergia: resultadosFisicoAdn.values[resultadosFisicoAdnIndexes.fatigaIndex],
+    saludFisica: resultadosFisicoAdn.wellnessQuotient * 5
+  };
+
+  // RESULTADOS MENTE ADN
+  const resultadosMenteAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_MENTE];
+  const resultadosMenteAdnIndexes = {
+    estresAnsiedadIndex: resultadosMenteAdn.labels.indexOf('Estrés & Ansiedad'),
+    habilidadCognitivaIndex: resultadosMenteAdn.labels.indexOf('Habilidad Cognitiva'),
+    depresionIndex: resultadosMenteAdn.labels.indexOf('Depresión'),
+    relacionamientoIndex: resultadosMenteAdn.labels.indexOf('Relacionamiento')
+  };
+
+  const valoresMenteAdn = {
+    estresAnsiedad: resultadosMenteAdn.values[resultadosMenteAdnIndexes.estresAnsiedadIndex],
+    capacidadMental: resultadosMenteAdn.values[resultadosMenteAdnIndexes.habilidadCognitivaIndex],
+    depresion: resultadosMenteAdn.values[resultadosMenteAdnIndexes.depresionIndex],
+    relacionamiento: resultadosMenteAdn.values[resultadosMenteAdnIndexes.relacionamientoIndex]
+  };
 
   const labels = ['Nivel Energía', 'Salud Física', 'Estrés/Ansiedad', 'Capacidad Mental ', 'Propósito en Oficio', 'Depresión', 'Relacionamiento', 'Esparcimiento'];
-  const topes = [20, 288, 21, 56, 32, 5, 27, 15, 10];
-  const sumasPorCuestionario = [
-    ArrayUtils.sumValues(sintomasPorSeccion[2]),
-    ArrayUtils.sumValues(Array.from(Array(16), (_, __) => '').map((_, index) => ArrayUtils.sumValues(sintomasPorSeccion[index]))),
-    ArrayUtils.sumValues(transtornoAnsiedad),
-    (estresPercibido.reduce((prev, curr, index) => {
-      if ([3, 4, 5, 6, 8, 9, 12].includes(index)) {
-        return prev + (4 - curr);
-      }
-
-      return parseInt(prev) + parseInt(curr);
-    }, 0)),
-    ArrayUtils.sumValues(sintomasPorSeccion[5]),
-    ArrayUtils.sumValues(sintomasPorSeccion[17]),
-    ArrayUtils.sumValues(saludPhq9),
-    ArrayUtils.sumValues(sintomasPorSeccion[15]),
-    ArrayUtils.sumValues(sintomasPorSeccion[16])
+  const values = [
+    ((valoresReporteMaika.nivelEnergia * 0.5) + (valoresFisicoAdn.nivelEnergia * 0.5)).toFixed(2),
+    ((valoresReporteMaika.saludFisica * 0.5) + (valoresFisicoAdn.saludFisica * 0.5)).toFixed(2),
+    ((valoresReporteMaika.estresAnsiedad * 0.5) + (valoresMenteAdn.estresAnsiedad * 0.5)).toFixed(2),
+    ((valoresReporteMaika.capacidadMental * 0.5) + (valoresMenteAdn.capacidadMental * 0.5)).toFixed(2),
+    ((valoresReporteMaika.propositoOficio * 0.5) + (valoresReporteMaika.propositoOficio * 0.5)).toFixed(2),
+    ((valoresReporteMaika.depresion * 0.5) + (valoresMenteAdn.depresion * 0.5)).toFixed(2),
+    ((valoresReporteMaika.relacionamiento * 0.5) + (valoresMenteAdn.relacionamiento * 0.5)).toFixed(2),
+    ((valoresReporteMaika.esparcimiento * 0.5) + (valoresReporteMaika.esparcimiento * 0.5)).toFixed(2)
   ];
 
-  const porcentajeRealSobreTope = sumasPorCuestionario.map((valorSuma, index) => {
-    return (valorSuma / topes[index]);
-  });
+  const wellnessQuotient = parseFloat(ArrayUtils.sumValues(values, false) / (values.length * 5));
 
-  const maxValues = labels.map((_) => formConfig.maxValue);
-
-  const percentages = [
-    (1 - porcentajeRealSobreTope[0]).toFixed(2),
-    (1 - porcentajeRealSobreTope[1]).toFixed(2),
-    (0.5 * (1 - porcentajeRealSobreTope[2]) + 0.5 * (1 - porcentajeRealSobreTope[3])).toFixed(2),
-    (1 - porcentajeRealSobreTope[4]).toFixed(2),
-    (Math.abs(porcentajeRealSobreTope[5])).toFixed(2),
-    (1 - porcentajeRealSobreTope[6]).toFixed(2),
-    (Math.abs(porcentajeRealSobreTope[7])).toFixed(2),
-    (Math.abs(porcentajeRealSobreTope[8])).toFixed(2)
-  ];
-
-  const valoresFinales = percentages.map((valor) => {
-    return valor * 5;
-  });
-
-  const wellnessQuotient = (ArrayUtils.sumValues(valoresFinales) / valoresFinales.length) * 5;
+  const percentages = values.map((value) => ((value / 5) * 100));
 
   const table = labels.map((label, index) => [label, percentages[index]]);
+  const maxValues = labels.map((_) => formConfig.maxValue);
 
   return {
     date: results['Fecha'],
@@ -73,8 +91,8 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
     maxValues,
     patientName: results['Nombre del Paciente'],
     percentages,
-    values: percentages,
-    wellnessQuotient
+    values,
+    wellnessQuotient: (wellnessQuotient * 100).toFixed(2)
   };
 };
 

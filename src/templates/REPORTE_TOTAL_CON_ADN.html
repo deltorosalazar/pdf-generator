@@ -22,97 +22,33 @@
         </div>
       </div>
     </div>
-  </section>
-  <section class="page">
     <p>Haz dado el primer paso para mejorar tu calidad de vida, ajustar tus hábitos permitiendo prevenir futuras
       enfermedades crónicas y potenciar tu bienestar.</p>
-    <p><b>{{patientName}}</b>, tu cociente de bienestar está ponderado con la información de ADN y el resultado es
-      de<b>{{wellnessQuotient}}%</b>
+    <p><b>{{forms.FORMULARIO_MEDICO_FILTRO_ADN_FISICO.patientName}}</b>, tu cociente de bienestar está ponderado con la
+      información de ADN y el resultado es
+      de <b>{{forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.wellnessQuotient}}%</b>
+    </p>
+    <table style="border-collapse: separate; border-spacing: 16px 0;">
+      <tr>
+        <td style="width: 40%">
+          <img src="{{infography}}" width='100%'>
+        </td>
+        <td style="text-align:center; width: 60%">
+          <img src="data:image/jpg;base64,{{forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.chart}}" width='100%'>
+          <div class='table results-table' style="margin: auto;">
+            {{#each forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.table}}
+            <div class='table__row'>
+              <div
+                class="table__cell {{setColor (getValueAtIndex this 1) ../forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.tableBounds.bad ../forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.tableBounds.medium ../forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.tableBounds.good }}">
+                {{getValueAtIndex this 1}}%</div>
+              <div class='table__cell'>{{getValueAtIndex this 0}}</div>
+            </div>
+            {{/each}}
+          </div>
+        </td>
+      </tr>
+    </table>
   </section>
-  <!-- <h1>{{title}}</h1>
-    <p>Haz dado el primer paso para mejorar tu calidad de vida, ajustar tus hábitos permitiendo prevenir futuras
-      enfermedades crónicas y potenciar tu bienestar.</p>
-    <p><b>{{patientName}}</b>, tu cociente de bienestar está ponderado con la información de ADN y el resultado es de
-      <b>&nbsp; {{wellnessQuotient}}%</b>
-    </p>
-    <div class="images-wrapper">
-      <div class="infography-wrapper">
-        <img src="{{infography}}" class="infography">
-      </div>
-      <div class="chart-wrapper">
-        <img src="{{chart}}" width="100%">
-        <div class="conventions-wrapper">
-          <p>5: Mejor Resultado</p>
-          <p>0: Peor Resultado</p>
-        </div>
-        <div class="results-wrapper">
-          <table class="results-wrapper__table">
-            <tbody>
-              {{#each labels}}
-              <tr>
-                <td style="width: 130px">{{this}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
-          <table class="results-wrapper__table">
-            <tbody>
-              {{#each percentages}}
-              <tr>
-                <td style="width: 30px" class="{{setColor this}}">
-                  &nbsp;
-                </td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
-          <table class="results-wrapper__table">
-            <tbody>
-              {{#each percentages}}
-              <tr>
-                <td>{{this}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="page">
-    <h1>Evaluación Integral y Recomendaciones</h1>
-    <p>
-      Tu calidad de vida depende en gran medida de tu bienestar y tu cociente de bienestar se mide en relación a las
-      siguientes dimensiones:
-    </p>
-    <ul>
-      <li>Bienestar Físico</li>
-      <li>Bienestar Mental</li>
-      <li>Bienestar Emocional</li>
-      <li>Bienestar Social</li>
-    </ul>
-
-    <p>
-      Teniendo esto en cuenta podrás identificar en la gráfica qué áreas requieren tu atención pues se encuentran por
-      debajo del 70% en la escala porcentual.
-    </p>
-
-    <p>
-      Un buen balance de vida es fundamental para incrementar tu cociente de bienestar. Sigue las instrucciones de tus
-      médicos Maika con el fin de gestionar tu salud en los próximos 12 meses y así mejorar tu calidad de vida.
-    </p>
-
-    <p>El conocimiento es la mejor medicina</p>
-
-    <p>Maika es prevención 100%</p>
-
-    <hr class="separator">
-
-    <h1>Detalles Evaluación Física en Maika App</h1>
-    <p>{{recomendations.[0]}}</p>
-    <h1>Detalles Evaluación Mental / Social / Emocional en Maika App</h1>
-    <p>{{recomendations.[1]}}</p>
-  -->
   <section class="page">
     <p class="footnote">
       La información de este informe no ha sido evaluada por la Administración de Alimentos y Medicamentos ni por
@@ -167,6 +103,14 @@
 
   .page {
     min-height: 279mm;
+  }
+
+  .separator {
+    background-color: #7b52fb;
+    height: 2px;
+    margin-bottom: 32px;
+    margin-top: 32px;
+    width: 100%;
   }
 
   .page:not(:last-of-type) {
@@ -235,82 +179,115 @@
     line-height: .1;
   }
 
-  .images-wrapper {
-    border: 1px solid black;
-    height: 600px;
-    position: relative;
+  .chart-wrapper {
+    display: table;
+    padding: 1rem 1rem 0;
     width: 100%;
   }
 
-  .infography-wrapper {
-    border: 1px solid red;
-    width: 35%;
+  .chart-wrapper .chart-wrapper__column {
+    display: table-column;
+  }
 
-    position: absolute;
-    top: 50%;
-    left: 0;
-    -webkit-transform: translateY(-50%);
-    transform: translateY(-50%);
+  .chart-wrapper .chart-wrapper__column .chart-wrapper__column__cell {
+    display: table-cell;
+  }
+
+  .cociente-de-bienestar-chart-wrapper {
+    width: 100%;
+  }
+
+  .cociente-de-bienestar-chart-wrapper .chart-wrapper__column {
+    width: 50%;
+  }
+
+  .cociente-de-bienestar-chart-wrapper .chart-wrapper__column:nth-child(1) {
+    background-color: red;
+  }
+
+  .cociente-de-bienestar-chart-wrapper .chart-wrapper__column:nth-child(2) {
+    background-color: blue;
+  }
+
+
+  /* .chart-wrapper .chart-wrapper__column {
+    display: table-column;
+    text-align: center;
+    vertical-align: top;
+  }
+
+  .chart-wrapper .chart-wrapper__column:first-child {
+    /* background-color: red; */
+  /* vertical-align: middle; */
+  /* width: 90%; */
+  /* } */
+
+  .chart-wrapper .chart-wrapper__column:last-child {
+    /* background-color: blue; */
+    display: none;
+    width: 30%;
+  }
+
+  .table {
+    border: 1px solid black;
+    display: table;
+    font-size: 14px;
+  }
+
+  .table .table__row:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+
+  .table__title {
+    text-align: left;
+    margin-bottom: .5rem;
+  }
+
+  .results-table {
+    margin-bottom: 2rem;
+  }
+
+  .results-table .table__cell {
+    display: table-cell;
+    padding: .25rem .5rem;
+  }
+
+  .results-table .table__cell:first-child {
+    text-align: center;
+    min-width: 2.5rem;
+  }
+
+  .results-table .table__cell:first-child.red {
+    background: red;
+  }
+
+  .results-table .table__cell:first-child.orange {
+    background: orange;
+  }
+
+  .results-table .table__cell:first-child.green {
+    background: greenyellow;
+  }
+
+  .results-table .table__cell:not(:last-child) {
+    border-right: 1px solid black;
+  }
+
+  .results-table .table__cell:nth-child(2) {
+    text-align: left;
+    width: 100%;
+  }
+
+  .conventions-wrapper {
+    padding: 0 3rem;
+  }
+
+  .conventions-wrapper .convention span {
+    font-family: 'AvenirBold';
   }
 
   .infography {
     width: 100%;
-  }
-
-  .separator {
-    border: 1px solid black !important;
-  }
-
-  .chart-wrapper {
-    border: 1px solid black;
-    width: 55%;
-
-    position: absolute;
-    top: 50%;
-    right: 0;
-    -webkit-transform: translateY(-50%);
-    transform: translateY(-50%);
-  }
-
-  table,
-  td,
-  th {
-    border: 1px solid black !important;
-  }
-
-  .conventions-wrapper {
-    border: 1px solid black;
-    padding: 0 8px;
-  }
-
-  .conventions-wrapper p {
-    margin: 0;
-  }
-
-  .results-wrapper__table {
-    display: inline-block;
-    border-collapse: collapse;
-    border-spacing: 20px 0;
-  }
-
-  .results-wrapper__table td {
-    font-size: 12px;
-  }
-
-  .red {
-    background: red;
-  }
-
-  .orange {
-    background: orange;
-  }
-
-  .green {
-    background: greenyellow;
-  }
-
-  .paragraph {
-    font-size: 18px;
   }
 
   .footnote {

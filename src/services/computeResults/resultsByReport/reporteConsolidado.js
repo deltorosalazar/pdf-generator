@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 const computeResultsByForm = require('../resultsByForm');
 
-const respuestaMedicamentos = (report, results) => {
+const reporteConsolidado = (report, results) => {
   const reports = Object.keys(report.forms).reduce((reportForms, currentFormID) => {
     return {
       ...reportForms,
@@ -12,4 +12,4 @@ const respuestaMedicamentos = (report, results) => {
   return reports;
 };
 
-module.exports = respuestaMedicamentos;
+module.exports = reporteConsolidado;

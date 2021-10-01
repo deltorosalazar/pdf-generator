@@ -1,4 +1,4 @@
-const { ArrayUtils } = require('../../../shared/utils');
+const { ArrayUtils } = require('../../../../shared/utils');
 
 /**
  * @param {Object} report
@@ -7,7 +7,6 @@ const { ArrayUtils } = require('../../../shared/utils');
  * @returns {{
  *  date: string
  *  labels: Array<string>
- *  table: Array<Array<number>>
  *  maxValues: Array<number>
  *  patientName: string
  *  percentages: Array<string>
@@ -30,7 +29,6 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
   const wellnessQuotient = (ArrayUtils.sumValues(values) / ArrayUtils.sumValues(maxValues)).toFixed(2);
 
   return {
-    patientID: results['Documento de Identidad Paciente'],
     date: results['Fecha'],
     labels,
     table,

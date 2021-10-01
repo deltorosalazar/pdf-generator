@@ -26,6 +26,10 @@ const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
 const MaikaError = require('./shared/MaikaError');
 
+const baseFunction = (generateBase64 = false) => {
+
+}
+
 app
   .use(helmet())
   .use(cors())
@@ -92,13 +96,10 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
     }
 
     // For debugging purposes.
-    Logger.log(JSON.stringify({ computedResults }, null, 2));
-
+    // Logger.log(JSON.stringify({ computedResults }, null, 2));
 
     const { computedForms, forms } = reportToGenerate;
     const formsKeys = [...Object.keys(forms), ...Object.keys(computedForms || {})];
-
-    console.log({ formsKeys });
 
     const resultsCharts = await Promise.all(
       formsKeys
@@ -122,37 +123,6 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
         }
       };
     }, computedResults);
-
-    // For debugging purposes.
-    // Logger.log({ hola: JSON.stringify(resultsWithCharts, null, 2) });
-
-    // const chart = await generateRadarChart(computedResults, reportToGenerate);
-    // let symptomsChart = null;
-    // let anexoMentalChart = null;
-
-    // if (computedResults.symptoms) {
-    //   const chartConfig = {
-    //     axisLabelHeight: 80,
-    //     axisLabelWidth: 235,
-    //     axisLabelFontSize: 13
-    //   };
-
-    //   symptomsChart = await generateRadarChart(computedResults.symptoms, {
-    //     chartConfig
-    //   });
-    // }
-
-    // if (computedResults.anexoMental) {
-    //   const chartConfig = {
-    //     axisLabelHeight: 50,
-    //     axisLabelWidth: 115,
-    //     axisLabelFontSize: 12
-    //   };
-
-    //   anexoMentalChart = await generateRadarChart(computedResults.anexoMental, {
-    //     chartConfig
-    //   });
-    // }
 
     const result = await generatePdf(reportToGenerate, resultsWithCharts);
 
@@ -249,7 +219,7 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
         }
       });
     } catch (error) {
-      console.log('errrro');
+      console.log('Error');
     }
   } catch (error) {
     return res.status(error.httpStatusCode).json({

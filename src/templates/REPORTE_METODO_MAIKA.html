@@ -25,7 +25,7 @@
     <p>Haz dado el primer paso para mejorar tu calidad de vida, ajustar tus hábitos permitiendo prevenir futuras
       enfermedades crónicas y potenciar tu bienestar.</p>
     <p><b>{{forms.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS.patientName}}</b>, tu cociente de bienestar con solo valoración
-      consulta sin ADN es de <b>{{forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.wellnessQuotient}}%</b>
+      consulta sin ADN es de <b>{{forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.wellnessQuotient}}%</b>
     </p>
 
     <table style="border-collapse: separate; border-spacing: 16px 0;">
@@ -34,11 +34,13 @@
           <img src="{{infography}}" width='100%'>
         </td>
         <td style="text-align:center; width: 60%">
-          <img src="data:image/jpg;base64,{{forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.chart}}" width='100%'>
+          <img src="data:image/jpg;base64,{{forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.chart}}" width='100%'>
           <div class='table results-table' style="margin: auto;">
-            {{#each forms.COCIENTE_DE_BIENESTAR_PONDERADO_CON_ADN.table}}
+            {{#each forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.table}}
             <div class='table__row'>
-              <div class="table__cell">{{getValueAtIndex this 1}}%</div>
+              <div
+                class="table__cell {{setColor (getValueAtIndex this 1) ../forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.tableBounds.bad ../forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.tableBounds.medium ../forms.COCIENTE_DE_BIENESTAR_PERCIBIDO.tableBounds.good }}">
+                {{getValueAtIndex this 1}}%</div>
               <div class='table__cell'>{{getValueAtIndex this 0}}</div>
             </div>
             {{/each}}
@@ -175,7 +177,7 @@
     <h2>Nivel de Bienestar en Depresión, Estrés y Ansiedad</h2>
     <table style="border-collapse: separate; border-spacing: 16px 0;">
       <tr>
-        <td style="width: 70%; background-color: blue; vertical-align: middle;">
+        <td style="width: 70%; vertical-align: middle;">
           <div style="width: 100%">
             <img src="data:image/jpg;base64,{{forms.ANEXO_MENTAL.chart}}" width='100%'>
           </div>
@@ -184,7 +186,9 @@
           <div class='table results-table' style="margin: auto;">
             {{#each forms.ANEXO_MENTAL.table}}
             <div class='table__row'>
-              <div class="table__cell">{{getValueAtIndex this 1}}%</div>
+              <div
+                class="table__cell {{setColor (getValueAtIndex this 1) ../forms.ANEXO_MENTAL.tableBounds.bad ../forms.ANEXO_MENTAL.tableBounds.medium ../forms.ANEXO_MENTAL.tableBounds.good }}">
+                {{getValueAtIndex this 1}}%</div>
               <div class='table__cell'>{{getValueAtIndex this 0}}</div>
             </div>
             {{/each}}
@@ -222,8 +226,9 @@
           <div class='table results-table' style='margin: auto;'>
             {{#each forms.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS.table}}
             <div class='table__row'>
-              <div class="table__cell green">
-                {{getValueAtIndex this 1}}</div>
+              <div
+                class="table__cell {{setColor (getValueAtIndex this 1) ../forms.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS.tableBounds.bad ../forms.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS.tableBounds.medium ../forms.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS.tableBounds.good }}">
+                {{getValueAtIndex this 1}}%</div>
               <div class='table__cell'>{{getValueAtIndex this 0}}</div>
             </div>
             {{/each}}
@@ -585,7 +590,7 @@
 
   .results-table .table__cell:first-child {
     text-align: center;
-    width: 2rem;
+    min-width: 2.25rem;
   }
 
   .results-table .table__cell:first-child.red {
