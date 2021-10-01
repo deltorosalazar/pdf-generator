@@ -24,8 +24,22 @@ const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
 const MaikaError = require('./shared/MaikaError');
 
+const getMetadata = (report, results) => {
+  const formsKeys = Object.keys(report.forms);
+  console.log({ formsKeys });
+  console.log({ results });
+  console.log({ 'formsKeys[0]': formsKeys[0] });
+  const initialReport = results[formsKeys[0]];
+
+  return {
+    date: initialReport['Fecha'],
+    patientName: initialReport['Nombre del Paciente']
+  };
+};
+
 const baseFunction = async (patientID, reportToGenerate, generateBase64 = false) => {
   const results = await readSheets(patientID, reportToGenerate);
+  let metadata = {};
 
   // For debugging purposes.
   // Logger.log(JSON.stringify({ results }, null, 2));
@@ -36,6 +50,12 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
 
   try {
     computedResults = await computeResults(reportToGenerate, results);
+
+    metadata = {
+      ...getMetadata(reportToGenerate, results),
+      id: patientID,
+      report: reportToGenerate.id
+    };
   } catch (error) {
     // console.log({ error });
     // return res.status(500).json({
@@ -73,9 +93,9 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
     };
   }, computedResults);
 
-  const result = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
+  const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
 
-  return result;
+  return { pdf, metadata };
 };
 
 app
@@ -125,7 +145,7 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const pdf = await baseFunction(id, reportToGenerate);
+    const { pdf } = await baseFunction(id, reportToGenerate);
 
     pdf.pipe(res);
 
@@ -170,17 +190,12 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const pdf = await baseFunction(id, reportToGenerate, true);
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
 
     return res.status(200).json({
       message: 'Base64 report generated successfuly',
       file: pdf,
-      metadata: {
-        date: 'computedResults.date',
-        id,
-        report,
-        patientName: 'computedResults.patientName'
-      }
+      metadata
     });
   } catch (error) {
     return res.status(error.httpStatusCode).json({
