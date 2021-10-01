@@ -19,10 +19,10 @@ const generatePdf = (reportToGenerate, results, generateBase64 = false, saveToS3
   const options = {
     pageSize: 'letter',
     orientation: reportToGenerate.orientation || 'portrait',
-    marginBottom: '.25mm',
-    marginTop: '0mm',
-    marginLeft: '.5mm',
-    marginRight: '.5mm'
+    // marginBottom: '.25mm',
+    // marginTop: '0mm',
+    // marginLeft: '.5mm',
+    // marginRight: '.5mm'
   };
 
   const htmlCode = fs.readFileSync(`./src/templates/${template}`, 'utf8');
@@ -66,6 +66,22 @@ const generatePdf = (reportToGenerate, results, generateBase64 = false, saveToS3
     // }
 
     const stream = wkhtmltopdf(resultHtml, options);
+
+    if (generateBase64) {
+      return new Promise((resolve, reject) => {
+        toArray(stream)
+          .then((parts) => {
+            const buffers = parts.map((part) => {
+              return Buffer.isBuffer(part) ? part : Buffer.from(part);
+            });
+
+            const generatedBuffer = Buffer.concat(buffers);
+
+            resolve(generatedBuffer.toString('base64'));
+          })
+          .catch(reject);
+      });
+    }
 
     return Promise.resolve(stream);
 
