@@ -1,8 +1,10 @@
-const fs = require("fs");
-const handlebars = require("./../../helpers/handlebars");
-const wkhtmltopdf = require("../../helpers/pdf/wkhtmltopdf");
-const toArray = require("stream-to-array");
-const S3 = require("./../../helpers/aws/s3");
+/* eslint-disable max-len */
+const fs = require('fs');
+const toArray = require('stream-to-array');
+const handlebars = require('../../helpers/handlebars');
+const wkhtmltopdf = require('../../helpers/pdf/wkhtmltopdf');
+const S3 = require('../../helpers/aws/s3');
+const { FORMS, COMPUTED_FORMS } = require('../../shared/constants');
 
 /**
  *
@@ -11,92 +13,106 @@ const S3 = require("./../../helpers/aws/s3");
  * @param {*} results
  * @param {*} otherCharts
  */
-const generatePdf = (chart, reportToGenerate, results, otherCharts, saveToS3) => {
+const generatePdf = (reportToGenerate, results, generateBase64 = false, saveToS3 = false) => {
   const { template } = reportToGenerate;
 
   const options = {
-    pageSize: "letter",
+    pageSize: 'letter',
+    orientation: reportToGenerate.orientation || 'portrait',
+    // marginBottom: '.25mm',
+    // marginTop: '0mm',
+    // marginLeft: '.5mm',
+    // marginRight: '.5mm'
   };
 
-  const htmlCode = fs.readFileSync(`./src/templates/${template}`, "utf8");
+  const htmlCode = fs.readFileSync(`./src/templates/${template}`, 'utf8');
 
-  const compiledTemplate = handlebars.compile(htmlCode);
+  try {
+    const compiledTemplate = handlebars.compile(htmlCode);
+    const formsKeys = [...Object.keys(FORMS), ...Object.keys(COMPUTED_FORMS)];
+    const resultHtml = compiledTemplate({
+      title: reportToGenerate.title,
+      infography:
+        reportToGenerate.infography
+        && require(`../../templates/assets/${reportToGenerate.infography}`),
+      forms: formsKeys.reduce((formResults, formKey) => {
+        const formID = FORMS[formKey] ? FORMS[formKey] : COMPUTED_FORMS[formKey];
 
-  const resultHtml = compiledTemplate({
-    chart: `data:image/jpg;base64,${chart}`,
-    title: reportToGenerate.title,
-    recomendations: results.recomendations,
-    patientName: results.patientName,
-    date: results.date,
-    labels: results.labels,
-    wellnessQuotient: results.wellnessQuotient,
-    hero: require(`../../templates/assets/heroes/${reportToGenerate.hero}`),
-    infography:
-      reportToGenerate.infography &&
-      require(`../../templates/assets/${reportToGenerate.infography}`),
-    percentages: results.percentages,
-    symptomsTable: results.symptomsTable,
-    ...otherCharts
-  });
-
-  // For debugging purposes.
-  // wkhtmltopdf(resultHtml, options)
-  //     .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
-
-  if (saveToS3) {
-    wkhtmltopdf(resultHtml, options, function (error, stream) {
-      if (error) return reject(error);
-
-      return toArray(stream)
-        .then(function (parts) {
-          const buffers = parts.map((part) =>
-            Buffer.isBuffer(part) ? part : Buffer.from(part)
-          );
-
-          let generatedBuffer = Buffer.concat(buffers);
-
-          resolve(generatedBuffer);
-        })
-        .catch(reject);
+        return {
+          ...formResults,
+          [formKey]: formResults[formID]
+        };
+      }, results)
     });
-  }
 
-  const stream = wkhtmltopdf(resultHtml, options)
+    // For debugging purposes.
+    // wkhtmltopdf(resultHtml, options)
+    //     .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
 
-  return Promise.resolve(stream)
+    // if (saveToS3) {
+    //   wkhtmltopdf(resultHtml, options, (error, stream) => {
+    //     if (error) return reject(error);
 
-  // return new Promise(async (resolve, reject) => {
+    //     return toArray(stream)
+    //       .then((parts) => {
+    //         const buffers = parts.map((part) => (Buffer.isBuffer(part) ? part : Buffer.from(part)));
+
+    //         const generatedBuffer = Buffer.concat(buffers);
+
+    //         resolve(generatedBuffer);
+    //       })
+    //       .catch(reject);
+    //   });
+    // }
+
+    const stream = wkhtmltopdf(resultHtml, options);
+
+    if (generateBase64) {
+      return new Promise((resolve, reject) => {
+        toArray(stream)
+          .then((parts) => {
+            const buffers = parts.map((part) => {
+              return Buffer.isBuffer(part) ? part : Buffer.from(part);
+            });
+
+            const generatedBuffer = Buffer.concat(buffers);
+
+            resolve(generatedBuffer.toString('base64'));
+          })
+          .catch(reject);
+      });
+    }
+
+    return Promise.resolve(stream);
+
+    // return new Promise(async (resolve, reject) => {
     // var stream = wkhtmltopdf(fs.createReadStream('test.pdf'))
 
     // console.log(stream);
 
-
-
-
-      // .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
+    // .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
 
     // wkhtmltopdf(resultHtml, options, function (error, stream) {
     //   if (error) return reject(error)
 
     //   console.log(stream);
 
-      // return toArray(stream)
-      //   .then(function (parts) {
-      //     const buffers = parts.map((part) =>
-      //       Buffer.isBuffer(part) ? part : Buffer.from(part)
-      //     );
-      //     let generatedBuffer = Buffer.concat(buffers);
+    // return toArray(stream)
+    //   .then(function (parts) {
+    //     const buffers = parts.map((part) =>
+    //       Buffer.isBuffer(part) ? part : Buffer.from(part)
+    //     );
+    //     let generatedBuffer = Buffer.concat(buffers);
 
-      //     resolve(generatedBuffer)
-      //   })
-      //   .catch(reject)
+    //     resolve(generatedBuffer)
+    //   })
+    //   .catch(reject)
     // });
-
 
     // await S3.getInstance()
     //   .putObject({
     //     Body: stream,
-    //     Bucket: process.env.PDF_BUCKET	,
+    //     Bucket: process.env.PDF_BUCKET,
     //     ACL: "private",
     //     ContentType: "application/pdf",
     //     Key: key,
@@ -111,8 +127,11 @@ const generatePdf = (chart, reportToGenerate, results, otherCharts, saveToS3) =>
     // });
 
     // resolve()
-    //resolve("generated pdf");
-  // });
+    // resolve("generated pdf");
+    // });
+  } catch (error) {
+    console.log({ error });
+  }
 };
 
 module.exports = generatePdf;
