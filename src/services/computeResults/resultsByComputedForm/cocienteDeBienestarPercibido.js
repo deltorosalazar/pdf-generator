@@ -60,7 +60,7 @@ const cocienteDeBienestarPercibido = (formConfig, results) => {
 
   const wellnessQuotient = ArrayUtils.sumValues(percentages.map((value) => value * 5), false) / (percentages.length * 5);
 
-  const table = labels.map((label, index) => [label, percentages[index] * 100]);
+  const table = labels.map((label, index) => [label, (percentages[index] * 100).toFixed(2)]);
 
   return {
     date: results['Fecha'],

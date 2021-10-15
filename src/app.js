@@ -26,9 +26,6 @@ const MaikaError = require('./shared/MaikaError');
 
 const getMetadata = (report, results) => {
   const formsKeys = Object.keys(report.forms);
-  console.log({ formsKeys });
-  console.log({ results });
-  console.log({ 'formsKeys[0]': formsKeys[0] });
   const initialReport = results[formsKeys[0]];
 
   return {
@@ -38,17 +35,17 @@ const getMetadata = (report, results) => {
 };
 
 const baseFunction = async (patientID, reportToGenerate, generateBase64 = false) => {
-  const results = await readSheets(patientID, reportToGenerate);
-  let metadata = {};
-
-  // For debugging purposes.
-  // Logger.log(JSON.stringify({ results }, null, 2));
-
-  // if (results instanceof Error) throw new Error(results);
-
-  let computedResults = null;
-
   try {
+    const results = await readSheets(patientID, reportToGenerate);
+    let metadata = {};
+
+    // For debugging purposes.
+    // Logger.log(JSON.stringify({ results }, null, 2));
+
+    if (results instanceof Error) throw new Error(results);
+
+    let computedResults = null;
+
     computedResults = await computeResults(reportToGenerate, results);
 
     metadata = {
@@ -56,6 +53,38 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
       id: patientID,
       report: reportToGenerate.id
     };
+
+    // For debugging purposes.
+    // Logger.log(JSON.stringify({ computedResults }, null, 2));
+
+    const { computedForms, forms } = reportToGenerate;
+    const formsKeys = [...Object.keys(forms), ...Object.keys(computedForms || {})];
+
+    const resultsCharts = await Promise.all(
+      formsKeys
+        .map((formID) => {
+          const form = reportToGenerate.forms[formID] ? reportToGenerate.forms[formID] : reportToGenerate.computedForms[formID];
+
+          return form.chartConfig ? generateChart(form.chartConfig.type, computedResults[formID], form.chartConfig) : Promise.resolve(undefined);
+        })
+    );
+
+    const resultsWithCharts = Object.keys(computedResults).reduce((accumulatedResults, formID, index) => {
+      const form = reportToGenerate.forms[formID] ? reportToGenerate.forms[formID] : reportToGenerate.computedForms[formID];
+
+      return {
+        ...accumulatedResults,
+        [formID]: {
+          ...accumulatedResults[formID],
+          chart: resultsCharts[index],
+          tableBounds: form.tableBounds
+        }
+      };
+    }, computedResults);
+
+    const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
+
+    return { pdf, metadata };
   } catch (error) {
     // console.log({ error });
     // return res.status(500).json({
@@ -64,38 +93,6 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
 
     return Promise.reject(error);
   }
-
-  // For debugging purposes.
-  // Logger.log(JSON.stringify({ computedResults }, null, 2));
-
-  const { computedForms, forms } = reportToGenerate;
-  const formsKeys = [...Object.keys(forms), ...Object.keys(computedForms || {})];
-
-  const resultsCharts = await Promise.all(
-    formsKeys
-      .map((formID) => {
-        const form = reportToGenerate.forms[formID] ? reportToGenerate.forms[formID] : reportToGenerate.computedForms[formID];
-
-        return form.chartConfig ? generateChart(form.chartConfig.type, computedResults[formID], form.chartConfig) : Promise.resolve(undefined);
-      })
-  );
-
-  const resultsWithCharts = Object.keys(computedResults).reduce((accumulatedResults, formID, index) => {
-    const form = reportToGenerate.forms[formID] ? reportToGenerate.forms[formID] : reportToGenerate.computedForms[formID];
-
-    return {
-      ...accumulatedResults,
-      [formID]: {
-        ...accumulatedResults[formID],
-        chart: resultsCharts[index],
-        tableBounds: form.tableBounds
-      }
-    };
-  }, computedResults);
-
-  const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
-
-  return { pdf, metadata };
 };
 
 app

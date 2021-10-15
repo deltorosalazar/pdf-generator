@@ -127,7 +127,7 @@ const readSheets = async (patientID, reportToGenerate) => {
     return [];
   }
 
-  const reportForms = Object.keys(reportToGenerate.forms)
+  const reportForms = Object.keys(reportToGenerate.forms);
 
   const formsResults = await Promise.all(
     reportForms.map((form) => {
