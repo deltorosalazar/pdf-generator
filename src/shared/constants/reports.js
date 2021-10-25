@@ -80,7 +80,7 @@ const REPORTS = {
           }
         },
         tableBounds: {
-          bad: 100,
+          bad: 0,
           medium: 50,
           good: 80
         }
@@ -144,9 +144,9 @@ const REPORTS = {
           }
         },
         tableBounds: {
-          bad: 0,
-          medium: 3,
-          good: 5
+          bad: 80,
+          medium: 50,
+          good: 0
         }
       }
     }
