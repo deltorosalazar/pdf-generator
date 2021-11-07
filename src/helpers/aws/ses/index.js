@@ -5,11 +5,17 @@ const nodemailer = require('nodemailer');
 
 async function sendMail(base64, email) {
   try {
+    const SESConfig = {
+      apiVersion: '2010-12-01',
+      accessKeyId: process.env.AWS_SECRET_ID,
+      accessSecretKey: process.env.AWS_SECRET_KEY,
+      region: 'us-east-2'
+    };
     const transporter = nodemailer.createTransport({
-      SES: new AWS.SES({ apiVersion: '2010-12-01', region: 'us-east-2' })
+      SES: new AWS.SES(SESConfig)
     });
     const text = 'Adjunto encontrará el reporte consolidado.';
-    // send mail with defined transport object
+    // Send mail with defined transport object
     const info = await transporter.sendMail({
       from: '"Auxiliar Maika" <auxiliar@docmaika.com>',
       to: email,
