@@ -17,6 +17,8 @@ RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkh
 
 RUN apt-get -y install imagemagick librsvg2-dev librsvg2-bin
 
+RUN apt-get -y install awscli
+
 RUN apt-get -y clean && \
     apt-get -y purge && \
     rm -rf /var/lib/apt/lists/* /tmp/*
@@ -24,6 +26,10 @@ RUN apt-get -y clean && \
 RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
+
+RUN mkdir ./.aws
+
+COPY ./aws-credentials-docker ./.aws
 
 COPY ./ ./
 
@@ -33,4 +39,12 @@ RUN npm install
 
 EXPOSE 4000
 
-CMD [ "npm", "run", "prod" ]
+CMD [ "npm", "run", "prod"]
+
+# #local Env
+# #XCMD npm install aws-ses-local -g
+
+# #local env
+# CMD tail -f /dev/null
+# #CMD ["-f","/dev/null"]
+

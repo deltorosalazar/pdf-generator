@@ -14,11 +14,15 @@ const generatePdf = require('./services/generatePDF');
 const {
   computeResults,
   generateChart,
-  readSheets
+  readSheets,
+  readFullSheet
 } = require('./services');
 
-const { REPORTS } = require('./shared/constants');
+const { REPORTS, FORMS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
+
+const createSqsClient = require('./helpers/aws/sqs')
+const sendMail = require('./helpers/aws/ses')
 
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
@@ -154,7 +158,6 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
     //   'Content-Disposition': `inline; filename=${computedResults.date}-${computedResults.patientName}.pdf`
     // });
   } catch (error) {
-    console.log(error);
     return res.status(error.httpStatusCode).json({
       timestamp: Date.now(),
       status: error.httpStatusCode,
@@ -207,6 +210,156 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
     });
   }
 });
+
+//app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, res) => {
+app.post('/bulk-emails', async (req, res) => {
+
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  //const { sqs_account_id = 000000000000, sqs_queue_name = "queue-maika" } = process.env
+
+  try {
+    //const { id, report, email } = body;
+
+    const { startDate, endDate } = body;
+
+    // get records from google and generate data in format:
+    const UsersData = [
+      {
+        id: '0102030405',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'deltorosalazar@gmail.com',
+      },
+      {
+        id: '1870820221',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'chcamiloam@gmail.com',
+      },
+      {
+        id: '0102030405',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'deltorosalazar+1@gmail.com',
+      },
+      {
+        id: '1870820221',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'chcamiloam+1@gmail.com',
+      },
+      {
+        id: '0102030405',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'deltorosalazar+2@gmail.com',
+      },
+      {
+        id: '1870820221',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'chcamiloam+2@gmail.com',
+      },{
+        id: '0102030405',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'deltorosalazar+3@gmail.com',
+      },
+      {
+        id: '1870820221',
+        report: 'REPORTE_METODO_MAIKA',
+        email: 'chcamiloam+3@gmail.com',
+      }
+    ]
+
+    // let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
+
+    // console.log(result)
+
+    const sqsClient = createSqsClient()
+
+    await Promise.all(UsersData.map(async (documentToCreate) => new Promise((resolve, reject) => {
+      const params = {
+        MessageBody: JSON.stringify(documentToCreate),
+        QueueUrl: process.env.SQS_QUEUE_URL
+      };
+
+      sqsClient.sendMessage(params, (err, data)=>{
+        if(err) reject(err)
+        else resolve(data)
+      })
+    })))
+
+    // return res.status(200).json({
+    //   text: 'test'
+    // });
+
+    return res.status(200).json({
+      env: app.get('env'),
+      UsersData
+    });
+
+  } catch (error) {
+    console.log("Error", error)
+    return res.status(error.httpStatusCode).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
+app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  //dev
+
+  try {
+    Logger.log('Step 1: Received request')
+    const { id, report, email } = body;
+    Logger.log('Step 2: Received params')
+    const reportToGenerate = REPORTS[report];
+    Logger.log('Step 3: Get Report')
+    // For debugging purposes.
+
+    if (!reportToGenerate) {
+      throw new MaikaError(
+        400,
+        `Este reporte no existe [${report}].`,
+        CLIENT_INVALID_OPTION,
+        {
+          received: report,
+          expected: Object.keys(REPORTS)
+        }
+      );
+    }
+    Logger.log('Step 5: Start to generate base64')
+
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
+
+    Logger.log('Step 6: base 64 generated, Send email')
+
+    let result = await sendMail(pdf, email)
+    
+    Logger.log('Step 7: Email sent')
+
+    Logger.log(result);
+    
+    return res.status(200).json({
+      env: app.get('env'),
+      metadata
+    });
+
+  } catch (error) {
+    Logger.log('Step Fatal', error)
+    return res.status(error.httpStatusCode || 400).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
 
 const server = http.createServer(app);
 
