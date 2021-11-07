@@ -6,9 +6,9 @@ const nodemailer = require('nodemailer');
 async function sendMail(base64, email) {
   try {
     const transporter = nodemailer.createTransport({
-      SES: new AWS.SES({ apiVersion: '2010-12-01' })
+      SES: new AWS.SES({ apiVersion: '2010-12-01', region: 'us-east-2' })
     });
-    const text = 'Adjunto encontrara el reporte consolidado.';
+    const text = 'Adjunto encontrará el reporte consolidado.';
     // send mail with defined transport object
     const info = await transporter.sendMail({
       from: '"Auxiliar Maika" <auxiliar@docmaika.com>',

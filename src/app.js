@@ -21,8 +21,8 @@ const {
 const { REPORTS, FORMS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
 
-const createSqsClient = require('./helpers/aws/sqs')
-const sendMail = require('./helpers/aws/ses')
+const createSqsClient = require('./helpers/aws/sqs');
+const sendMail = require('./helpers/aws/ses');
 
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
@@ -211,15 +211,14 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
   }
 });
 
-//app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, res) => {
+// app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, res) => {
 app.post('/bulk-emails', async (req, res) => {
-
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-  //const { sqs_account_id = 000000000000, sqs_queue_name = "queue-maika" } = process.env
+  // const { sqs_account_id = 000000000000, sqs_queue_name = "queue-maika" } = process.env
 
   try {
-    //const { id, report, email } = body;
+    // const { id, report, email } = body;
 
     const { startDate, endDate } = body;
 
@@ -228,49 +227,49 @@ app.post('/bulk-emails', async (req, res) => {
       {
         id: '0102030405',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'deltorosalazar@gmail.com',
+        email: 'deltorosalazar@gmail.com'
       },
       {
         id: '1870820221',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'chcamiloam@gmail.com',
+        email: 'chcamiloam@gmail.com'
       },
       {
         id: '0102030405',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'deltorosalazar+1@gmail.com',
+        email: 'deltorosalazar+1@gmail.com'
       },
       {
         id: '1870820221',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'chcamiloam+1@gmail.com',
+        email: 'chcamiloam+1@gmail.com'
       },
       {
         id: '0102030405',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'deltorosalazar+2@gmail.com',
+        email: 'deltorosalazar+2@gmail.com'
       },
       {
         id: '1870820221',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'chcamiloam+2@gmail.com',
-      },{
+        email: 'chcamiloam+2@gmail.com'
+      }, {
         id: '0102030405',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'deltorosalazar+3@gmail.com',
+        email: 'deltorosalazar+3@gmail.com'
       },
       {
         id: '1870820221',
         report: 'REPORTE_METODO_MAIKA',
-        email: 'chcamiloam+3@gmail.com',
+        email: 'chcamiloam+3@gmail.com'
       }
-    ]
+    ];
 
     // let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
 
     // console.log(result)
 
-    const sqsClient = createSqsClient()
+    const sqsClient = createSqsClient();
 
     await Promise.all(UsersData.map(async (documentToCreate) => new Promise((resolve, reject) => {
       const params = {
@@ -278,11 +277,11 @@ app.post('/bulk-emails', async (req, res) => {
         QueueUrl: process.env.SQS_QUEUE_URL
       };
 
-      sqsClient.sendMessage(params, (err, data)=>{
-        if(err) reject(err)
-        else resolve(data)
-      })
-    })))
+      sqsClient.sendMessage(params, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    })));
 
     // return res.status(200).json({
     //   text: 'test'
@@ -292,9 +291,8 @@ app.post('/bulk-emails', async (req, res) => {
       env: app.get('env'),
       UsersData
     });
-
   } catch (error) {
-    console.log("Error", error)
+    console.log('Error', error);
     return res.status(error.httpStatusCode).json({
       timestamp: Date.now(),
       status: error.httpStatusCode,
@@ -304,19 +302,19 @@ app.post('/bulk-emails', async (req, res) => {
       data: error.data
     });
   }
-})
+});
 
 app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-  //dev
+  // dev
 
   try {
-    Logger.log('Step 1: Received request')
+    Logger.log('Step 1: Received request');
     const { id, report, email } = body;
-    Logger.log('Step 2: Received params')
+    Logger.log('Step 2: Received params');
     const reportToGenerate = REPORTS[report];
-    Logger.log('Step 3: Get Report')
+    Logger.log('Step 3: Get Report');
     // For debugging purposes.
 
     if (!reportToGenerate) {
@@ -330,25 +328,24 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
         }
       );
     }
-    Logger.log('Step 5: Start to generate base64')
+    Logger.log('Step 5: Start to generate base64');
 
     const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
 
-    Logger.log('Step 6: base 64 generated, Send email')
+    Logger.log('Step 6: base 64 generated, Send email');
 
-    let result = await sendMail(pdf, email)
-    
-    Logger.log('Step 7: Email sent')
+    const result = await sendMail(pdf, email);
+
+    Logger.log('Step 7: Email sent');
 
     Logger.log(result);
-    
+
     return res.status(200).json({
       env: app.get('env'),
       metadata
     });
-
   } catch (error) {
-    Logger.log('Step Fatal', error)
+    Logger.log('Step Fatal', error);
     return res.status(error.httpStatusCode || 400).json({
       timestamp: Date.now(),
       status: error.httpStatusCode,
@@ -358,8 +355,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
       data: error.data
     });
   }
-})
-
+});
 
 const server = http.createServer(app);
 
