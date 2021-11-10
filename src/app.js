@@ -18,6 +18,11 @@ const {
   readFullSheet
 } = require('./services');
 
+const {
+  saveRecord,
+  updateRecord
+} = require('./helpers/faunadb')
+
 const { REPORTS, FORMS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
 
@@ -27,6 +32,11 @@ const sendMail = require('./helpers/aws/ses')
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
 const MaikaError = require('./shared/MaikaError');
+
+const EMAIL_STATUS = {
+  SENT: 'sent',
+  QUEUE: 'queue'
+}
 
 const getMetadata = (report, results) => {
   const formsKeys = Object.keys(report.forms);
@@ -217,41 +227,49 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
 
   try {
 
-    const { startDate = "0/0/0" , endDate = "0/0/0" } = body;
+    const { startDate = "0/0/0", endDate = "0/0/0" } = body;
 
     let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
 
     const d1 = startDate.split("/");
     const d2 = endDate.split("/");
 
-    const dateFrom = new Date(d1[2], parseInt(d1[1])-1, d1[0]);
-    const dateTo = new Date(d2[2], parseInt(d2[1])-1, d2[0]);
+    const dateFrom = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+    const dateTo = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
 
 
-    const filteredRecords = result.rows.filter((row)=>{
+    const filteredRecords = result.rows.filter((row) => {
       const dateToCheck = row["Marca temporal"].split(' ')[0].split("/")
-      const check = new Date(dateToCheck[2], parseInt(dateToCheck[1])-1, dateToCheck[0]);
+      const check = new Date(dateToCheck[2], parseInt(dateToCheck[1]) - 1, dateToCheck[0]);
       return check >= dateFrom && check <= dateTo
-    }).map((row)=>({
+    }).map((row) => ({
       id: row['Documento de Identidad Paciente'],
       report: 'REPORTE_METODO_MAIKA',
       email: row['Dirección de correo electrónico']
     }))
-    
+
     const sqsClient = createSqsClient()
 
-    await Promise.all(UsersData.map(async (documentToCreate) => new Promise((resolve, reject) => {
-      const params = {
-        MessageBody: JSON.stringify(documentToCreate),
-        QueueUrl: process.env.SQS_QUEUE_URL
-      };
-
-      sqsClient.sendMessage(params, (err, data)=>{
-        if(err) reject(err)
-        else resolve(data)
-      })
+    await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async(resolve, reject) => {
+      try {
+        const params = {
+          MessageBody: JSON.stringify(documentToCreate),
+          QueueUrl: process.env.SQS_QUEUE_URL
+        };
+  
+        await sqsClient.sendMessage(params).promise()
+        await saveRecord({
+          id: documentToCreate.id,
+          email: documentToCreate.email,
+          status: EMAIL_STATUS.QUEUE
+        })
+        resolve()
+      } catch (error) {
+        console.log('ERRORS')
+        reject(error)
+      }
     })))
-
+    
     return res.status(200).json({
       env: app.get('env'),
       filteredRecords
@@ -274,7 +292,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
 
 
   try {
-    const { id = '0102030405', report = 'REPORTE_METODO_MAIKA', email = 'deltorosalazar+2@gmail.com' } = body;
+    const { id, report, email } = body;
 
     const reportToGenerate = REPORTS[report];
 
@@ -294,7 +312,11 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
 
 
     await sendMail(pdf, email)
-    
+
+    await updateRecord(
+      id, EMAIL_STATUS.SENT
+    )
+
     return res.status(200).json({
       env: app.get('env'),
       metadata
