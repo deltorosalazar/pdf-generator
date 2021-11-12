@@ -321,7 +321,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
       );
     }
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true, true);
+    const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, true, true);
 
     if(pdf === null && stopProcess){
       return res.status(200).json({
