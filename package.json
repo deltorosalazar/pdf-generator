@@ -28,7 +28,7 @@
     "serverless-http": "^2.6.0",
     "stream-to-array": "^2.3.0",
     "wkhtmltopdf": "^0.3.4",
-    "aws-sdk": "^2.770.0",
+    "aws-sdk": "^2.770.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
