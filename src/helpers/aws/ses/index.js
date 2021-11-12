@@ -1,6 +1,6 @@
 
 const nodemailer = require("nodemailer");
-const Logger = require('../../../shared/Logger');
+const AWS = require('aws-sdk')
 
 
 //dev
