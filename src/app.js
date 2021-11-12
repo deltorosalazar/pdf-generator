@@ -40,7 +40,7 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
     let metadata = {};
 
     // For debugging purposes.
-    // Logger.log(JSON.stringify({ results }, null, 2));
+    Logger.log(JSON.stringify({ results }, null, 2));
 
     if (results instanceof Error) throw new Error(results);
 
@@ -55,7 +55,7 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
     };
 
     // For debugging purposes.
-    // Logger.log(JSON.stringify({ computedResults }, null, 2));
+    Logger.log(JSON.stringify({ computedResults }, null, 2));
 
     const { computedForms, forms } = reportToGenerate;
     const formsKeys = [...Object.keys(forms), ...Object.keys(computedForms || {})];
@@ -81,6 +81,8 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
         }
       };
     }, computedResults);
+
+    Logger.log(JSON.stringify({ resultsWithCharts }, null, 2));
 
     const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
 
