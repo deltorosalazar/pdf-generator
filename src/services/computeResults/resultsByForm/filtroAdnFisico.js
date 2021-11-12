@@ -15,9 +15,23 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
-  const labels = Object.keys(results).filter((_, index) => {
-    return index > offsetIndexes;
-  });
+  // const labels = Object.keys(results).filter((_, index) => {
+  //   return index > offsetIndexes;
+  // });
+
+  const labels = [
+    'Riesgo Cardiovascular',
+    'Riesgo Diabetes',
+    'Sobrepeso',
+    'Cancer',
+    'Enfermedad Autoinmune',
+    'Enfermedad del Colon',
+    'Enfermedad del Hígado',
+    'Alzheimer',
+    'Parkinson',
+    'Enfermedad Pulmonar',
+    'Fatiga'
+  ]
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);

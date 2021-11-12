@@ -1,4 +1,4 @@
-const { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } = require('google-spreadsheet');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 const {
   GLOBAL_ENV_VARIABLES,
   GOOGLE_API_QUOTA_EXCEEDED,
@@ -206,7 +206,7 @@ const readFullSheet = async (sheetID) => {
 
   return {
     sheet,
-    rows,
+    rows
   }
 };
 

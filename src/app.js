@@ -15,6 +15,7 @@ const {
   computeResults,
   generateChart,
   readSheets,
+  readSheetsFromFirestore,
   readFullSheet
 } = require('./services');
 
@@ -48,9 +49,10 @@ const getMetadata = (report, results) => {
   };
 };
 
-const baseFunction = async (patientID, reportToGenerate, generateBase64 = false) => {
+const baseFunction = async (patientID, reportToGenerate, generateBase64 = false, enhanced = false) => {
   try {
-    const results = await readSheets(patientID, reportToGenerate);
+    const generateResultsMethod = enhanced ? readSheetsFromFirestore : readSheets
+    const results = await generateResultsMethod(patientID, reportToGenerate);
     let metadata = {};
 
     // For debugging purposes.
@@ -96,7 +98,7 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
       };
     }, computedResults);
 
-    Logger.log(JSON.stringify({ resultsWithCharts }, null, 2));
+    // Logger.log(JSON.stringify({ resultsWithCharts }, null, 2));
 
     const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
 
@@ -158,7 +160,10 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const { pdf } = await baseFunction(id, reportToGenerate);
+    const generateBase64 = false;
+    const enhanced = body['enhanced']
+
+    const { pdf } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
 
     pdf.pipe(res);
 
@@ -203,7 +208,10 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
+    const generateBase64 = true;
+    const enhanced = body['enhanced']
+
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
 
     return res.status(200).json({
       message: 'Base64 report generated successfuly',
@@ -237,7 +245,6 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
     const dateFrom = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
     const dateTo = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
 
-
     const filteredRecords = result.rows.filter((row) => {
       const dateToCheck = row["Marca temporal"].split(' ')[0].split("/")
       const check = new Date(dateToCheck[2], parseInt(dateToCheck[1]) - 1, dateToCheck[0]);
@@ -251,13 +258,13 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
     //row['Dirección de correo electrónico']
     const sqsClient = createSqsClient()
 
-    await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async(resolve, reject) => {
+    await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async (resolve, reject) => {
       try {
         const params = {
           MessageBody: JSON.stringify(documentToCreate),
           QueueUrl: process.env.SQS_QUEUE_URL
         };
-  
+
         await sqsClient.sendMessage(params).promise()
         await saveRecord({
           id: documentToCreate.id,
@@ -270,7 +277,7 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
         reject(error)
       }
     })))
-    
+
     return res.status(200).json({
       env: app.get('env'),
       filteredRecords
@@ -291,7 +298,6 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
 app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-
   try {
     const { id, report, email } = body;
 
@@ -309,8 +315,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
       );
     }
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
-
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true, true);
 
     await sendMail(pdf, email, id)
 

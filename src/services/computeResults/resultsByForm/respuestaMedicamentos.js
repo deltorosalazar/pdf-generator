@@ -16,9 +16,24 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
-  const labels = Object.keys(results).filter((_, index) => {
-    return index > offsetIndexes;
-  });
+  // const labels = Object.keys(results).filter((_, index) => {
+  //   return index > offsetIndexes;
+  // });
+
+  // console.log({ labels });
+
+  const labels = [
+    'Estatinas',
+    'Antihipertensivos',
+    'Aspirina',
+    'Tratamiento AntiRetroviral',
+    'Quimioterapia',
+    'Anti Depresivos',
+    'Anti Psicóticos',
+    'Lithium',
+    'Corticoesteroides',
+    'Viagra'
+  ]
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);
