@@ -31,7 +31,7 @@ async function updateRecord(id, status, aditionalData = {}) {
     q.Select(['ref'], q.Get(q.Match(
       q.Index('get_email_by_id'), id
     ))),
-    { data: { status, sent: new Date().getTime(), ...aditionalData } }
+    { data: { status, [status]: new Date().getTime(), ...aditionalData } }
   );
   const response = await client.query(query);
   return response;

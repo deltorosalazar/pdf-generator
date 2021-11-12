@@ -48,6 +48,11 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false,
   try {
     const generateResultsMethod = enhanced ? readSheetsFromFirestore : readSheets
     const results = await generateResultsMethod(patientID, reportToGenerate);
+
+    if(results.stopProcess){
+      return { pdf: null, metadata: null, stopProcess: true };
+    }
+
     let metadata = {};
 
     // For debugging purposes.
@@ -206,7 +211,13 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
     const generateBase64 = true;
     const enhanced = body['enhanced']
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
+    const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
+
+    if(pdf === null && stopProcess && enhanced){
+      return res.status(200).json({
+        message: 'Missing information to generate report',
+      });  
+    }
 
     return res.status(200).json({
       message: 'Base64 report generated successfuly',
@@ -311,6 +322,12 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
     }
 
     const { pdf, metadata } = await baseFunction(id, reportToGenerate, true, true);
+
+    if(pdf === null && stopProcess){
+      return res.status(200).json({
+        message: 'Missing information to generate report',
+      }); 
+    }
 
     await sendMail(pdf, email, id)
 

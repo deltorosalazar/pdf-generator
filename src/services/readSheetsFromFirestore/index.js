@@ -52,6 +52,7 @@ const readSheetsFromFirestore = async (patientID, reportToGenerate) => {
     await updateRecord(
       patientID, EMAIL_STATUS.FAILED, { error: { documentsMissing } }
     )
+    return { stopProcess: true }
   }
 
   return results;
