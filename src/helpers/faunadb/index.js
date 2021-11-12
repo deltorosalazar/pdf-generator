@@ -21,7 +21,6 @@ async function saveRecord(record) {
     const res = await client.query(request);
     return res;
   } catch (error) {
-    console.log('asc', error);
     throw new Error(error);
   }
 }

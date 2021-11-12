@@ -1,5 +1,7 @@
 const { firestore } = require('../lib/firebase');
 const { FORMS } = require('./../shared/constants/forms')
+const Logger = require('./../shared/Logger');
+
 
 class FirestoreService {
   /**
@@ -21,11 +23,11 @@ class FirestoreService {
     const document = await documentReference.get()
 
     if (!document.exists) {
-      console.log('No such document!');
+      Logger.log('No such document!');
 
       return null;
     } else {
-      console.log('Document data:', document.data());
+      Logger.log('Document data:', document.data());
 
       return document.data();
     }
