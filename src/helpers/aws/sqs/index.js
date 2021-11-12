@@ -4,7 +4,7 @@ const AWS = require('aws-sdk')
 const createSqsClient = () => {
     return new AWS.SQS({
         apiVersion: '2012-11-05',
-        region: "us-east-2",
+        region: "us-east-1",
     });
 };
 
