@@ -26,12 +26,12 @@ async function saveRecord(record) {
   }
 }
 
-async function updateRecord(id, status) {
+async function updateRecord(id, status, aditionalData = {}) {
   const query = q.Update(
     q.Select(['ref'], q.Get(q.Match(
       q.Index('get_email_by_id'), id
     ))),
-    { data: { status, sent: new Date().getTime() } }
+    { data: { status, sent: new Date().getTime(), ...aditionalData } }
   );
   const response = await client.query(query);
   return response;

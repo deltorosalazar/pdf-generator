@@ -4,10 +4,16 @@ const {
   COMPUTED_FORMS
 } = require('./forms');
 const REPORTS = require('./reports');
+const EMAIL_STATUS = {
+  SENT: 'sent',
+  QUEUE: 'queue',
+  FAILED: 'failed'
+}
 
 module.exports = {
   CHARTS,
   COMPUTED_FORMS,
   FORMS,
-  REPORTS
+  REPORTS,
+  EMAIL_STATUS
 };

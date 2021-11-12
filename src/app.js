@@ -24,7 +24,7 @@ const {
   updateRecord
 } = require('./helpers/faunadb')
 
-const { REPORTS, FORMS } = require('./shared/constants');
+const { REPORTS, FORMS, EMAIL_STATUS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
 
 const createSqsClient = require('./helpers/aws/sqs')
@@ -33,11 +33,6 @@ const sendMail = require('./helpers/aws/ses')
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
 const MaikaError = require('./shared/MaikaError');
-
-const EMAIL_STATUS = {
-  SENT: 'sent',
-  QUEUE: 'queue'
-}
 
 const getMetadata = (report, results) => {
   const formsKeys = Object.keys(report.forms);
