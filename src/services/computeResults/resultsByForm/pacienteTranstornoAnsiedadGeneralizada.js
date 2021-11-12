@@ -15,9 +15,21 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
-  const labels = Object.keys(results).filter((_, index) => {
-    return index > offsetIndexes;
-  });
+  // const labels = Object.keys(results).filter((_, index) => {
+  //   return index > offsetIndexes;
+  // });
+
+  // console.log({ labels });
+
+  const labels = [
+    'Se ha sentido nervioso(a), ansioso(a) o con los nervios de punta',
+    'No ha sido capaz de parar o controlar su preocupación',
+    'Se ha preocupado demasiado por motivos diferentes',
+    'Ha tenido dificultad para relajarse',
+    'Se ha sentido inquieto(a) que no ha podido quedarse quieto(a)',
+    'Se ha molestado o irritado fácilmente',
+    'Ha tenido miedo de que algo terrible fuera a pasar'
+  ]
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);

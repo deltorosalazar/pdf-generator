@@ -1,11 +1,11 @@
-const AWS = require('aws-sdk')
+const AWS = require('aws-sdk');
 
-//dev
+// dev
 const createSqsClient = () => {
-    return new AWS.SQS({
-        apiVersion: '2012-11-05',
-        region: "us-east-1",
-    });
+  return new AWS.SQS({
+    apiVersion: '2012-11-05',
+    region: 'us-east-1'
+  });
 };
 
-module.exports = createSqsClient
+module.exports = createSqsClient;

@@ -25,6 +25,28 @@ _Windows_
 Revisar este repositorio.
 https://www.npmjs.com/package/anychart-nodejs
 
+---
+
+Para poder generar los PDF, es necesario usar el binario de wkhtmltopdf específico para cada sistema operativo.
+
+_Linux_
+
+```
+cp wkhtmltox/bin/wkhtmltopdf.linux wkhtmltox/bin/wkhtmltopdf
+```
+
+_MacOS_
+
+```
+cp wkhtmltox/bin/wkhtmltopdf.mac wkhtmltox/bin/wkhtmltopdf
+```
+
+- Configurar las variables de entorno
+
+```
+cp .env.template .env
+```
+
 - Iniciar el servidor
 
 ```
@@ -194,3 +216,7 @@ docker container rm maika-pdf && \
 docker build --tag maika-pdf-image-ubuntu-1604 . && \
 docker run --publish 4000:4000 --name maika-pdf maika-pdf-image-ubuntu-1604
 ```
+
+## Generación y Envío de PDF
+
+TBD
