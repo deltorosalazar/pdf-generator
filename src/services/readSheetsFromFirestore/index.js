@@ -5,9 +5,10 @@ const {
   MAIKA_EMPTY_FORM
 } = require('../../shared/constants/error_codes');
 const MaikaError = require('../../shared/MaikaError');
+const { updateRecord } = require('../../helpers/faunadb')
+const { EMAIL_STATUS } = require('../../shared/constants');
 
-
-const { FirestoreService } = require('../FirestoreService')
+const { FirestoreService, getListOfFilesWithErrors } = require('../FirestoreService')
 
 const readFromFirestore = async (collection, patientID) => {
   const firestoreService = new FirestoreService()
@@ -45,6 +46,13 @@ const readSheetsFromFirestore = async (patientID, reportToGenerate) => {
       [reportForms[index]]: formResult
     };
   }, {});
+
+  const documentsMissing = getListOfFilesWithErrors(results)
+  if (documentsMissing.length > 0) {
+    await updateRecord(
+      patientID, EMAIL_STATUS.FAILED, { error: { documentsMissing } }
+    )
+  }
 
   return results;
 };

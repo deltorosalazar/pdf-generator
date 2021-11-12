@@ -1,6 +1,4 @@
 const { firestore } = require('../lib/firebase');
-const { updateRecord } = require('../helpers/faunadb')
-const { EMAIL_STATUS } = require('./../shared/constants');
 const { FORMS } = require('./../shared/constants/forms')
 
 class FirestoreService {
@@ -41,13 +39,6 @@ class FirestoreService {
     const collectionReference = firestore.collection(collection);
     const records = await collectionReference.get();
 
-
-    const documentsMissing = getListOfFilesWithErrors(records.results)
-
-    await updateRecord(
-      id, EMAIL_STATUS.EMAIL_STATUS, { error: { documentsMissing } }
-    )
-
     return records;
   }
 
@@ -78,7 +69,7 @@ class FirestoreService {
 }
 
 const getListOfFilesWithErrors = (errors) => {
-  return Object.keys(errors).map((id) => getFileNameById(id))
+  return Object.keys(errors).filter((id) => errors[id] === null).map((id) => getFileNameById(id))
 }
 
 const getFileNameById = (value) => {
@@ -87,5 +78,6 @@ const getFileNameById = (value) => {
 
 
 module.exports = {
-  FirestoreService
+  FirestoreService,
+  getListOfFilesWithErrors
 };
