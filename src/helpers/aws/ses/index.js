@@ -5,7 +5,7 @@ const AWS = require('aws-sdk')
 
 //dev
 
-async function sendMail(base64, email) {
+async function sendMail(base64, email, id) {
   try {
     const SES_CONFIG = {
       apiVersion: "2010-12-01",
@@ -17,12 +17,12 @@ async function sendMail(base64, email) {
     let transporter = nodemailer.createTransport({
       SES: new AWS.SES()
     });
-    let text = 'Adjunto encontrara el reporte consolidado.';
+    let text = `ID:${id} - Adjunto encontrara el reporte consolidado.`;
     // send mail with defined transport object
     let info = await transporter.sendMail({
       from: 'auxiliar@docmaika.com',
       to: email,
-      subject: "Reporte consolidado",
+      subject: `Reporte consolidado - ${id}`,
       text: text,
       html: '<div>' + text + '</div>',
       attachments: [{

@@ -312,7 +312,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
     const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
 
 
-    await sendMail(pdf, email)
+    await sendMail(pdf, email, id)
 
     await updateRecord(
       id, EMAIL_STATUS.SENT

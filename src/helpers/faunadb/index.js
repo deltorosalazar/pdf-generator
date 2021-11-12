@@ -13,7 +13,8 @@ async function saveRecord(record) {
       data: {
         id: record.id,
         email: record.email,
-        status: record.status
+        status: record.status,
+        queue: new Date().getTime()
       }
     })
 
@@ -31,7 +32,7 @@ async function updateRecord(id, status) {
     q.Select(['ref'], q.Get(q.Match(
       q.Index("get_email_by_id"), id
     ))),
-    { data: { status: status } }
+    { data: { status: status, sent: new Date().getTime() } }
   )
   const response = await client.query(query);
   return response
