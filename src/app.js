@@ -14,15 +14,29 @@ const generatePdf = require('./services/generatePDF');
 const {
   computeResults,
   generateChart,
-  readSheets
+  readSheets,
+  readFullSheet
 } = require('./services');
 
-const { REPORTS } = require('./shared/constants');
+const {
+  saveRecord,
+  updateRecord
+} = require('./helpers/faunadb')
+
+const { REPORTS, FORMS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
+
+const createSqsClient = require('./helpers/aws/sqs')
+const sendMail = require('./helpers/aws/ses')
 
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
 const MaikaError = require('./shared/MaikaError');
+
+const EMAIL_STATUS = {
+  SENT: 'sent',
+  QUEUE: 'queue'
+}
 
 const getMetadata = (report, results) => {
   const formsKeys = Object.keys(report.forms);
@@ -207,6 +221,121 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
     });
   }
 });
+
+app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, res) => {
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  try {
+
+    const { startDate = "0/0/0", endDate = "0/0/0" } = body;
+
+    let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
+
+    const d1 = startDate.split("/");
+    const d2 = endDate.split("/");
+
+    const dateFrom = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+    const dateTo = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
+
+
+    const filteredRecords = result.rows.filter((row) => {
+      const dateToCheck = row["Marca temporal"].split(' ')[0].split("/")
+      const check = new Date(dateToCheck[2], parseInt(dateToCheck[1]) - 1, dateToCheck[0]);
+      return check >= dateFrom && check <= dateTo
+    }).map((row) => ({
+      id: row['Documento de Identidad Paciente'],
+      report: 'REPORTE_METODO_MAIKA',
+      email: 'mdts.dev@gmail.com'
+    }))
+
+    //row['Dirección de correo electrónico']
+    const sqsClient = createSqsClient()
+
+    await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async(resolve, reject) => {
+      try {
+        const params = {
+          MessageBody: JSON.stringify(documentToCreate),
+          QueueUrl: process.env.SQS_QUEUE_URL
+        };
+  
+        await sqsClient.sendMessage(params).promise()
+        await saveRecord({
+          id: documentToCreate.id,
+          email: documentToCreate.email,
+          status: EMAIL_STATUS.QUEUE
+        })
+        resolve()
+      } catch (error) {
+        console.log('ERRORS')
+        reject(error)
+      }
+    })))
+    
+    return res.status(200).json({
+      env: app.get('env'),
+      filteredRecords
+    });
+
+  } catch (error) {
+    return res.status(error.httpStatusCode).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
+app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+
+  try {
+    const { id, report, email } = body;
+
+    const reportToGenerate = REPORTS[report];
+
+    if (!reportToGenerate) {
+      throw new MaikaError(
+        400,
+        `Este reporte no existe [${report}].`,
+        CLIENT_INVALID_OPTION,
+        {
+          received: report,
+          expected: Object.keys(REPORTS)
+        }
+      );
+    }
+
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
+
+
+    await sendMail(pdf, email)
+
+    await updateRecord(
+      id, EMAIL_STATUS.SENT
+    )
+
+    return res.status(200).json({
+      env: app.get('env'),
+      metadata
+    });
+
+  } catch (error) {
+    Logger.log('Step Fatal', error)
+    return res.status(error.httpStatusCode || 400).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
 
 const server = http.createServer(app);
 

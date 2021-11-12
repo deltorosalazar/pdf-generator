@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  gateway:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - $HOME/.aws/credentials:/home/app/.aws/credentials:ro
+    container_name: maika-pdf
+  localstack:
+    container_name: localstack
+    image: localstack/localstack
+    privileged: true
+    ports:
+      - "4566:4566"
+      - "9070:9070"
+    environment:
+      SERVICES: sqs,lambda
+      DOCKER_HOST: unix:///var/run/docker.sock
+      PORT_WEB_UI: 9070
+      LAMBDA_EXECUTOR: docker
+      DEBUG: 1
+      LAMBDA_DOCKER_NETWORK: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/localstack:/tmp/localstack
+      
