@@ -245,9 +245,10 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
     }).map((row) => ({
       id: row['Documento de Identidad Paciente'],
       report: 'REPORTE_METODO_MAIKA',
-      email: row['Dirección de correo electrónico']
+      email: 'mdts.dev@gmail.com'
     }))
 
+    //row['Dirección de correo electrónico']
     const sqsClient = createSqsClient()
 
     await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async(resolve, reject) => {
