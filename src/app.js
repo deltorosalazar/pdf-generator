@@ -298,7 +298,6 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
 app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-
   try {
     const { id, report, email } = body;
 
@@ -316,8 +315,7 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
       );
     }
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
-
+    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true, true);
 
     await sendMail(pdf, email, id)
 
