@@ -267,6 +267,8 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
     await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async (resolve, reject) => {
       try {
         const params = {
+          MessageDeduplicationId:  documentToCreate.id,
+          MessageGroupId: documentToCreate.id,
           MessageBody: JSON.stringify(documentToCreate),
           QueueUrl: process.env.SQS_QUEUE_URL
         };
