@@ -26,14 +26,18 @@ async function saveRecord(record) {
 }
 
 async function updateRecord(id, status, aditionalData = {}) {
-  const query = q.Update(
-    q.Select(['ref'], q.Get(q.Match(
-      q.Index('get_email_by_id'), id
-    ))),
-    { data: { status, [status]: new Date().getTime(), ...aditionalData } }
-  );
-  const response = await client.query(query);
-  return response;
+  try {
+    const query = q.Update(
+      q.Select(['ref'], q.Get(q.Match(
+        q.Index('get_email_by_id'), id
+      ))),
+      { data: { status, [status]: new Date().getTime(), ...aditionalData } }
+    );
+    const response = await client.query(query);
+    return response;
+  } catch (error) {
+    throw new Error(error)
+  }
 }
 
 module.exports = {
