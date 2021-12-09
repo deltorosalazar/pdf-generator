@@ -241,7 +241,7 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
 
   try {
 
-    const { startDate = "0/0/0", endDate = "0/0/0" } = body;
+    const { startDate = "0/0/0", endDate = "0/0/0", isProduction = false } = body;
 
     let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
 
@@ -259,7 +259,7 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
       {
         id: row['Documento de Identidad Paciente'],
         report: 'REPORTE_METODO_MAIKA',
-        email: body.isProduction?row['Dirección de correo electrónico']:'mdts.dev@gmail.com'
+        email: isProduction ? row['Dirección de correo electrónico'] : 'mdts.dev@gmail.com'
       }))
 
     const sqsClient = createSqsClient()
@@ -279,7 +279,7 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
         })
         resolve()
       } catch (error) {
-        console.log('ERRORS')
+        console.log('ERRORS', error)
         reject(error)
       }
     })))
