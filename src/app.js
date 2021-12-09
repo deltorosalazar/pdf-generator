@@ -49,7 +49,7 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false,
     const generateResultsMethod = enhanced ? readSheetsFromFirestore : readSheets
     const results = await generateResultsMethod(patientID, reportToGenerate);
 
-    if(results.stopProcess){
+    if (results.stopProcess) {
       return { pdf: null, metadata: null, stopProcess: true };
     }
 
@@ -213,10 +213,10 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
 
     const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
 
-    if(pdf === null && stopProcess && enhanced){
+    if (pdf === null && stopProcess && enhanced) {
       return res.status(200).json({
         message: 'Missing information to generate report',
-      });  
+      });
     }
 
     return res.status(200).json({
@@ -255,13 +255,13 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
       const dateToCheck = row["Marca temporal"].split(' ')[0].split("/")
       const check = new Date(dateToCheck[2], parseInt(dateToCheck[1]) - 1, dateToCheck[0]);
       return check >= dateFrom && check <= dateTo
-    }).map((row) => ({
-      id: row['Documento de Identidad Paciente'],
-      report: 'REPORTE_METODO_MAIKA',
-      email: 'mdts.dev@gmail.com'
-    }))
+    }).map((row) => (
+      {
+        id: row['Documento de Identidad Paciente'],
+        report: 'REPORTE_METODO_MAIKA',
+        email: body.isProduction?row['Dirección de correo electrónico']:'mdts.dev@gmail.com'
+      }))
 
-    //row['Dirección de correo electrónico']
     const sqsClient = createSqsClient()
 
     await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async (resolve, reject) => {
@@ -286,6 +286,7 @@ app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, r
 
     return res.status(200).json({
       env: app.get('env'),
+      sent: filteredRecords.length,
       filteredRecords
     });
 
@@ -323,10 +324,10 @@ app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, r
 
     const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, true, true);
 
-    if(pdf === null && stopProcess){
+    if (pdf === null && stopProcess) {
       return res.status(200).json({
         message: 'Missing information to generate report',
-      }); 
+      });
     }
 
     await sendMail(pdf, email, id)
