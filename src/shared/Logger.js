@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 class Logger {
   static log(message) {
-    if (process.env === 'development') {
+    if (process.env.NODE_ENV === 'production') {
       return;
     }
 

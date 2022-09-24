@@ -1,9 +1,12 @@
 const computeResults = require('./computeResults');
-const readSheets = require('./readSheets');
+const { readSheets, readFullSheet } = require('./readSheets');
+const { readSheetsFromFirestore } = require('./readSheetsFromFirestore');
 const generateChart = require('./generateChart');
 
 module.exports = {
   computeResults,
   generateChart,
-  readSheets
+  readSheets,
+  readSheetsFromFirestore,
+  readFullSheet
 };

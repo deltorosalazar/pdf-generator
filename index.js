@@ -1,8 +1,6 @@
-const serverless = require('serverless-http')
-const { server } = require('./src/app')
+const serverless = require('serverless-http');
+const { server } = require('./src/app');
 
-server.on('app::started', port =>
-  console.log(`App started and listening at ${port}`)
-)
+server.on('app::started', (port) => console.log(`App started and listening at ${port}`));
 
-module.exports.handler = serverless(server)
+module.exports.handler = serverless(server);

@@ -14,11 +14,21 @@ const generatePdf = require('./services/generatePDF');
 const {
   computeResults,
   generateChart,
-  readSheets
+  readSheets,
+  readSheetsFromFirestore,
+  readFullSheet
 } = require('./services');
 
-const { REPORTS } = require('./shared/constants');
+const {
+  saveRecord,
+  updateRecord
+} = require('./helpers/faunadb')
+
+const { REPORTS, FORMS, EMAIL_STATUS } = require('./shared/constants');
 const Logger = require('./shared/Logger');
+
+const createSqsClient = require('./helpers/aws/sqs')
+const sendMail = require('./helpers/aws/ses')
 
 const requiredParams = require('./middlewares/params').handler;
 const { CLIENT_INVALID_OPTION } = require('./shared/constants/error_codes');
@@ -34,13 +44,19 @@ const getMetadata = (report, results) => {
   };
 };
 
-const baseFunction = async (patientID, reportToGenerate, generateBase64 = false) => {
+const baseFunction = async (patientID, reportToGenerate, generateBase64 = false, enhanced = false) => {
   try {
-    const results = await readSheets(patientID, reportToGenerate);
+    const generateResultsMethod = enhanced ? readSheetsFromFirestore : readSheets
+    const results = await generateResultsMethod(patientID, reportToGenerate);
+
+    if (results.stopProcess) {
+      return { pdf: null, metadata: null, stopProcess: true };
+    }
+
     let metadata = {};
 
     // For debugging purposes.
-    // Logger.log(JSON.stringify({ results }, null, 2));
+    Logger.log(JSON.stringify({ results }, null, 2));
 
     if (results instanceof Error) throw new Error(results);
 
@@ -55,7 +71,7 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
     };
 
     // For debugging purposes.
-    // Logger.log(JSON.stringify({ computedResults }, null, 2));
+    Logger.log(JSON.stringify({ computedResults }, null, 2));
 
     const { computedForms, forms } = reportToGenerate;
     const formsKeys = [...Object.keys(forms), ...Object.keys(computedForms || {})];
@@ -81,6 +97,8 @@ const baseFunction = async (patientID, reportToGenerate, generateBase64 = false)
         }
       };
     }, computedResults);
+
+    // Logger.log(JSON.stringify({ resultsWithCharts }, null, 2));
 
     const pdf = await generatePdf(reportToGenerate, resultsWithCharts, generateBase64);
 
@@ -142,7 +160,10 @@ app.post('/', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const { pdf } = await baseFunction(id, reportToGenerate);
+    const generateBase64 = false;
+    const enhanced = body['enhanced']
+
+    const { pdf } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
 
     pdf.pipe(res);
 
@@ -187,7 +208,16 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
       );
     }
 
-    const { pdf, metadata } = await baseFunction(id, reportToGenerate, true);
+    const generateBase64 = true;
+    const enhanced = body['enhanced']
+
+    const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, generateBase64, enhanced);
+
+    if (pdf === null && stopProcess && enhanced) {
+      return res.status(200).json({
+        message: 'Missing information to generate report',
+      });
+    }
 
     return res.status(200).json({
       message: 'Base64 report generated successfuly',
@@ -205,6 +235,125 @@ app.post('/base', requiredParams(['id', 'report']), async (req, res) => {
     });
   }
 });
+
+app.post('/bulk-emails', requiredParams(['startDate', 'endDate']), async (req, res) => {
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  try {
+
+    const { startDate = "0/0/0", endDate = "0/0/0", isProduction = false } = body;
+
+    let result = await readFullSheet(FORMS['FORMULARIO_PACIENTE_SALUD_PHQ9'])
+
+    const d1 = startDate.split("/");
+    const d2 = endDate.split("/");
+
+    const dateFrom = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+    const dateTo = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
+
+    const filteredRecords = result.rows.filter((row) => {
+      const dateToCheck = row["Marca temporal"].split(' ')[0].split("/")
+      const check = new Date(dateToCheck[2], parseInt(dateToCheck[1]) - 1, dateToCheck[0]);
+      return check >= dateFrom && check <= dateTo
+    }).map((row) => (
+      {
+        id: row['Documento de Identidad Paciente'],
+        report: 'REPORTE_METODO_MAIKA',
+        email: isProduction ? row['Dirección de correo electrónico'] : 'mdts.dev@gmail.com'
+      }))
+
+    const sqsClient = createSqsClient()
+
+    await Promise.all(filteredRecords.map(async (documentToCreate) => new Promise(async (resolve, reject) => {
+      try {
+        const params = {
+          MessageBody: JSON.stringify(documentToCreate),
+          QueueUrl: process.env.SQS_QUEUE_URL
+        };
+
+        await sqsClient.sendMessage(params).promise()
+        await saveRecord({
+          id: documentToCreate.id,
+          email: documentToCreate.email,
+          status: EMAIL_STATUS.QUEUE
+        })
+        resolve()
+      } catch (error) {
+        console.log('ERRORS', error)
+        reject(error)
+      }
+    })))
+
+    return res.status(200).json({
+      env: app.get('env'),
+      sent: filteredRecords.length,
+      filteredRecords
+    });
+
+  } catch (error) {
+    return res.status(error.httpStatusCode).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
+app.post('/send-email', requiredParams(['id', 'report', 'email']), async (req, res) => {
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  try {
+    const { id, report, email } = body;
+
+    const reportToGenerate = REPORTS[report];
+
+    if (!reportToGenerate) {
+      throw new MaikaError(
+        400,
+        `Este reporte no existe [${report}].`,
+        CLIENT_INVALID_OPTION,
+        {
+          received: report,
+          expected: Object.keys(REPORTS)
+        }
+      );
+    }
+
+    const { pdf, metadata, stopProcess } = await baseFunction(id, reportToGenerate, true, true);
+
+    if (pdf === null && stopProcess) {
+      return res.status(200).json({
+        message: 'Missing information to generate report',
+      });
+    }
+
+    await sendMail(pdf, email, id)
+
+    await updateRecord(
+      id, EMAIL_STATUS.SENT
+    )
+
+    return res.status(200).json({
+      env: app.get('env'),
+      metadata
+    });
+
+  } catch (error) {
+    Logger.log('Step Fatal', error)
+    return res.status(error.httpStatusCode || 400).json({
+      timestamp: Date.now(),
+      status: error.httpStatusCode,
+      messages: [
+        error.message
+      ],
+      data: error.data
+    });
+  }
+})
+
 
 const server = http.createServer(app);
 

@@ -1,4 +1,4 @@
-const { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } = require('google-spreadsheet');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 const {
   GLOBAL_ENV_VARIABLES,
   GOOGLE_API_QUOTA_EXCEEDED,
@@ -147,4 +147,67 @@ const readSheets = async (patientID, reportToGenerate) => {
   return results;
 };
 
-module.exports = readSheets;
+const readFullSheet = async (sheetID) => {
+  const spreadsheet = new GoogleSpreadsheet(sheetID);
+
+  const {
+    GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    GOOGLE_PRIVATE_KEY
+  } = process.env;
+
+  if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+    throw new MaikaError(
+      400,
+      'Alguna de las variables de entorno no ha sido definida.',
+      GLOBAL_ENV_VARIABLES,
+      {
+        received: {
+          GOOGLE_SERVICE_ACCOUNT_EMAIL: !!GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          GOOGLE_PRIVATE_KEY: !!GOOGLE_PRIVATE_KEY
+        },
+        expected: ['GOOGLE_SERVICE_ACCOUNT_EMAIL', 'GOOGLE_PRIVATE_KEY']
+      }
+    );
+  }
+
+  await spreadsheet.useServiceAccountAuth({
+    client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
+  });
+
+  await spreadsheet.loadInfo();
+
+  const sheet = spreadsheet.sheetsByIndex[0];
+
+  let rows = [];
+
+  try {
+    rows = await sheet.getRows();
+  } catch (error) {
+    throw new MaikaError(
+      429,
+      'Se han excedido el límite de consultas a los resultados. Por favor intente en 1 o 2 minutos.',
+      GOOGLE_API_QUOTA_EXCEEDED,
+      null
+    );
+  }
+
+  if (!rows.length) {
+    throw new MaikaError(
+      503,
+      `No hay registros en el formulario (${sheetID})`,
+      MAIKA_EMPTY_FORM,
+      {
+        received: sheetID,
+        expected: null
+      }
+    );
+  }
+
+  return {
+    sheet,
+    rows
+  }
+};
+
+module.exports = { readSheets, readFullSheet };

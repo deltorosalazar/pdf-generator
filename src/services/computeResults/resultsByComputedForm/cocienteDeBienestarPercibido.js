@@ -70,7 +70,7 @@ const cocienteDeBienestarPercibido = (formConfig, results) => {
     patientName: results['Nombre del Paciente'],
     percentages: percentages.map((value) => value * 5),
     values: percentages.map((value) => value * 100),
-    wellnessQuotient: wellnessQuotient * 100
+    wellnessQuotient: (wellnessQuotient * 100).toFixed(2)
   };
 };
 
