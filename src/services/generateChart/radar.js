@@ -60,7 +60,7 @@ const generateRadarChart = async (results, chartConfig, base64 = true) => {
 
   chart.xAxis().labels()
     .fontColor('#7b52fb')
-    .fontFamily('Avenir')
+    .fontFamily('Helvetica')
     .fontWeight('bold');
 
   chart.line(referenceData).name('Reference').markers({
@@ -75,9 +75,9 @@ const generateRadarChart = async (results, chartConfig, base64 = true) => {
   });
   chart.area(data).stroke({ color: '#7b52fb', thickness: 5, lineCap: 'round' });
   chart.yGrid(true);
-  chart.yGrid().stroke('black');
+  chart.yGrid().stroke('#000');
   chart.xGrid(true);
-  chart.xGrid().stroke('black');
+  chart.xGrid().stroke('#000');
 
   chart.container('container');
   chart.draw();
