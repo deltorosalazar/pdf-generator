@@ -41,4 +41,12 @@ handlebars.registerHelper('orCondition', (value1, value2) => {
   return !!value1 || !!value2;
 });
 
+handlebars.registerHelper('eqCondition', (a, b, opts) => {
+  if (a === b) {
+    return opts.fn(this);
+  }
+
+  return opts.inverse(this);
+});
+
 module.exports = handlebars;

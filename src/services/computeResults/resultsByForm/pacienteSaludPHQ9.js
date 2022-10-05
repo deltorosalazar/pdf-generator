@@ -15,6 +15,7 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
+  console.log('Paciente - PHQ9 (ES)');
   // const labels = Object.keys(results).filter((_, index) => {
   //   return index > offsetIndexes;
   // });
@@ -32,7 +33,7 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     '¿ Se ha movido o hablado tan lento que otras personas podrían haberlo notado ? o lo contrario - muy inquieto(a) o agitado(a) que ha estado moviéndose mucho más de lo normal',
     'Pensamientos de que estaría mejor muerto(a) o de lastimarse de alguna manera',
     'Si marcó cualquiera de los problemas, ¿qué tanta dificultad le han dado estos problemas para hacer su trabajo, encargarse de las tareas del hogar, o llevarse bien con otras personas?'
-  ]
+  ];
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);

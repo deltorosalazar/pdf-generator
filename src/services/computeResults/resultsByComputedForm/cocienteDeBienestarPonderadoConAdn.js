@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
-const { COMPUTED_FORMS, FORMS } = require('../../../shared/constants/forms');
+const { FORMS } = require('../../../shared/constants/forms');
+// const { COMPUTED_FORMS } = require('../../../shared/constants/computedForms');
 const { ArrayUtils } = require('../../../shared/utils');
+const Logger = require('../../../shared/Logger');
 
 /**
  * @param {Object} results
@@ -15,8 +17,10 @@ const { ArrayUtils } = require('../../../shared/utils');
  *  wellnessQuotient: number
  * }}
  */
-const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
-  const cocienteDeBienestarPercibido = results[COMPUTED_FORMS.COCIENTE_DE_BIENESTAR_PERCIBIDO];
+const cocienteDeBienestarPonderadoConAdn = (formConfig, results, language) => {
+  Logger.log('📄 Cociente de Bienestar Ponderado');
+
+  const cocienteDeBienestarPercibido = results['COCIENTE_DE_BIENESTAR_PERCIBIDO'];
   const reporteMaikaIndexes = {
     nivelEnergiaIndex: cocienteDeBienestarPercibido.labels.indexOf('Nivel Energía'),
     saludFisicaIndex: cocienteDeBienestarPercibido.labels.indexOf('Salud Física'),
@@ -40,7 +44,7 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
   };
 
   // RESULTADOS FISICO ADN
-  const resultadosFisicoAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_FISICO];
+  const resultadosFisicoAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_FISICO['forms'][language]];
   const resultadosFisicoAdnIndexes = {
     fatigaIndex: resultadosFisicoAdn.labels.indexOf('Fatiga')
   };
@@ -50,7 +54,7 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
   };
 
   // RESULTADOS MENTE ADN
-  const resultadosMenteAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_MENTE];
+  const resultadosMenteAdn = results[FORMS.FORMULARIO_MEDICO_FILTRO_ADN_MENTE['forms'][language]];
   const resultadosMenteAdnIndexes = {
     estresAnsiedadIndex: resultadosMenteAdn.labels.indexOf('Estrés & Ansiedad'),
     habilidadCognitivaIndex: resultadosMenteAdn.labels.indexOf('Habilidad Cognitiva'),
@@ -92,7 +96,8 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results) => {
     patientName: results['Nombre del Paciente'],
     percentages,
     values,
-    wellnessQuotient: (wellnessQuotient * 100).toFixed(2)
+    wellnessQuotient: (wellnessQuotient * 100).toFixed(2),
+    tableBounds: formConfig.tableBounds
   };
 };
 

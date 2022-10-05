@@ -33,7 +33,7 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     'Lithium',
     'Corticoesteroides',
     'Viagra'
-  ]
+  ];
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);
@@ -53,7 +53,8 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     patientName: results['Nombre del Paciente'],
     percentages,
     values,
-    wellnessQuotient
+    wellnessQuotient,
+    tableBounds: formConfig.tableBounds
   };
 };
 

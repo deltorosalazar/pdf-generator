@@ -1,7 +1,6 @@
 const { firestore } = require('../lib/firebase');
-const { FORMS } = require('./../shared/constants/forms')
-const Logger = require('./../shared/Logger');
-
+const { FORMS } = require('../shared/constants/forms');
+const Logger = require('../shared/Logger');
 
 class FirestoreService {
   /**
@@ -31,6 +30,13 @@ class FirestoreService {
 
       return document.data();
     }
+  }
+
+  getCompound(collection, compoundQueries) {
+    // const collectionReference = firestore.collection(collection);
+
+    // collectionReference.where('state', '>=', 'CA').where('state', '<=', 'IN');
+
   }
 
   async getAll(collection) {
@@ -68,15 +74,22 @@ class FirestoreService {
       this.deleteCollection(collection);
     });
   }
-}
 
-const getListOfFilesWithErrors = (errors) => {
-  return Object.keys(errors).filter((id) => errors[id] === null).map((id) => getFileNameById(id))
+  async updateOne(collection, id, data) {
+    const collectionReference = firestore.collection(collection).doc(id);
+    const res = await collectionReference.update(data);
+
+    return true
+  }
 }
 
 const getFileNameById = (value) => {
-  return Object.keys(FORMS).find(key => FORMS[key] === value);
-}
+  return Object.keys(FORMS).find((key) => FORMS[key] === value);
+};
+
+const getListOfFilesWithErrors = (errors) => {
+  return Object.keys(errors).filter((id) => errors[id] === null).map((id) => getFileNameById(id));
+};
 
 
 module.exports = {

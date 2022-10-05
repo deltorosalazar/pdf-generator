@@ -1,9 +1,12 @@
 /* eslint-disable max-len */
 const { FORMS } = require('../../../shared/constants/forms');
 const { ArrayUtils } = require('../../../shared/utils');
+const Logger = require('../../../shared/Logger');
 
 /**
+ * @param {Object} formConfig
  * @param {Object} results
+ * @param {string} language
  * @returns {{
  *  date: string
  *  labels: Array<string>
@@ -15,11 +18,23 @@ const { ArrayUtils } = require('../../../shared/utils');
  *  wellnessQuotient: number
  * }}
  */
-const cocienteDeBienestarPercibido = (formConfig, results) => {
-  const sintomasPorSeccion = results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS]['symptomsByChartSection'];
-  const saludPhq9 = results[FORMS.FORMULARIO_PACIENTE_SALUD_PHQ9].values;
-  const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO].values;
-  const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA].values;
+const cocienteDeBienestarPercibido = (formConfig, results, language) => {
+  Logger.log('📄 Cociente de Bienestar Percibido');
+
+  const sintomasPorSeccion = results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS['forms'][language]]['symptomsByChartSection'];
+  const saludPhq9 = results[FORMS.FORMULARIO_PACIENTE_SALUD_PHQ9['forms'][language]].values;
+  const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO['forms'][language]].values;
+  const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA['forms'][language]].values;
+
+  console.log({ language });
+  // console.log(results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS['forms'][language]]);
+
+  // console.log({
+  //   sintomasPorSeccion,
+  //   saludPhq9,
+  //   estresPercibido,
+  //   transtornoAnsiedad
+  // });
 
   const labels = ['Nivel Energía', 'Salud Física', 'Estrés/Ansiedad', 'Capacidad Mental ', 'Propósito en Oficio', 'Depresión', 'Relacionamiento', 'Esparcimiento'];
   const topes = [20, 288, 21, 56, 32, 5, 27, 15, 10];
@@ -70,7 +85,8 @@ const cocienteDeBienestarPercibido = (formConfig, results) => {
     patientName: results['Nombre del Paciente'],
     percentages: percentages.map((value) => value * 5),
     values: percentages.map((value) => value * 100),
-    wellnessQuotient: (wellnessQuotient * 100).toFixed(2)
+    wellnessQuotient: wellnessQuotient * 100,
+    tableBounds: formConfig.tableBounds
   };
 };
 

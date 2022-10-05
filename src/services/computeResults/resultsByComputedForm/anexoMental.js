@@ -15,11 +15,13 @@ const { ArrayUtils } = require('../../../shared/utils');
  *  wellnessQuotient: number
  * }}
  */
-const anexoMental = (formConfig, results) => {
-  const sintomasPorSeccion = results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS]['symptomsByChartSection'];
-  const saludPhq9 = results[FORMS.FORMULARIO_PACIENTE_SALUD_PHQ9].values;
-  const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO].values;
-  const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA].values;
+const anexoMental = (formConfig, results, language) => {
+  console.log('Anexo Mental - ES');
+
+  const sintomasPorSeccion = results[FORMS.FORMULARIO_PACIENTE_SINTOMAS_MEDICOS['forms'][language]]['symptomsByChartSection'];
+  const saludPhq9 = results[FORMS.FORMULARIO_PACIENTE_SALUD_PHQ9['forms'][language]].values;
+  const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO['forms'][language]].values;
+  const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA['forms'][language]].values;
 
   const labels = ['Estrés', 'Ansiedad', 'Depresión'];
   const sumasPorCuestionario = [
@@ -41,9 +43,9 @@ const anexoMental = (formConfig, results) => {
   ];
 
   const values = [
-    (100 - (sumasPorCuestionario[3] / 56) * 100).toFixed(2),
-    (100 - (sumasPorCuestionario[2] / 21) * 100).toFixed(2),
-    (100 - (sumasPorCuestionario[6] / 27) * 100).toFixed(2)
+    Math.round(100 - (sumasPorCuestionario[3] / 56) * 100),
+    Math.round(100 - (sumasPorCuestionario[2] / 21) * 100),
+    Math.round(100 - (sumasPorCuestionario[6] / 27) * 100)
   ];
 
   const table = labels.map((label, index) => [label, values[index]]);
@@ -57,7 +59,8 @@ const anexoMental = (formConfig, results) => {
     maxValues,
     patientName: results['Nombre del Paciente'],
     percentages: values,
-    values
+    values,
+    tableBounds: formConfig.tableBounds
   };
 };
 

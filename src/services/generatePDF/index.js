@@ -5,49 +5,103 @@ const handlebars = require('../../helpers/handlebars');
 const wkhtmltopdf = require('../../helpers/pdf/wkhtmltopdf');
 const S3 = require('../../helpers/aws/s3');
 const { FORMS, COMPUTED_FORMS } = require('../../shared/constants');
+const path = require('path');
+const Logger = require('../../shared/Logger');
 
-/**
- *
- * @param {*} chart
- * @param {*} reportToGenerate
- * @param {*} results
- * @param {*} otherCharts
- */
-const generatePdf = (reportToGenerate, results, generateBase64 = false, saveToS3 = false) => {
-  const { template } = reportToGenerate;
-
+const generatePdf = (language, reportToGenerate, results, generateBase64 = false, saveToS3 = false) => {
+  const template = reportToGenerate['template'][language];
   const options = {
     pageSize: 'letter',
-    orientation: reportToGenerate.orientation || 'portrait',
-    // marginBottom: '.25mm',
-    // marginTop: '0mm',
-    // marginLeft: '.5mm',
-    // marginRight: '.5mm'
+    orientation: reportToGenerate.orientation || 'portrait'
   };
+
+  // console.log(Object.keys(FORMS));
 
   const htmlCode = fs.readFileSync(`./src/templates/${template}`, 'utf8');
 
+  // Partials
+  const footer = fs.readFileSync('./src/templates/partials/footer.handlebars', 'utf8');
+
   try {
+    handlebars.registerPartial('footer', footer);
     const compiledTemplate = handlebars.compile(htmlCode);
     const formsKeys = [...Object.keys(FORMS), ...Object.keys(COMPUTED_FORMS)];
+
+    // Logger.log({
+    //   formsKeys,
+    //   results
+    // });
+
+    // console.log('=-=-=-=-==-=-=-==');
+    // console.log(formsKeys.reduce((formResults, formKey) => {
+    //   const formID = FORMS[formKey] ? FORMS[formKey]['forms'][language] : COMPUTED_FORMS[formKey][language];
+
+    //   if (formID) {
+    //     console.log({ formID });
+    //   }
+    //   return {
+    //     ...formResults,
+    //     [formKey]: formResults[formID]
+    //   };
+    // }, results));
+
+
+    const a = formsKeys.reduce((formResults, formKey) => {
+      const formID = FORMS[formKey] ? FORMS[formKey]['forms'][language] : COMPUTED_FORMS[formKey]['forms'];
+
+      // console.log({ formID });
+
+      return {
+        ...formResults,
+        [formKey]: formResults[formID]
+      };
+    }, results);
+
+    // const b = formsKeys.reduce((formResults, formKey) => {
+    //   const formID = FORMS[formKey] ? FORMS[formKey]['forms'][language] : COMPUTED_FORMS[formKey]['forms'];
+
+    //   return {
+    //     ...formResults,
+    //     [formKey]: formID
+    //   };
+    // }, {});
+
+    console.log({ a });
+
+    const currentDir = path.join(__dirname, '../../');
+
+
+    // fs.writeFile(`report.json`, JSON.stringify(a, null, 2), (err) => {
+    //   if (err) {
+    //     console.error(err);
+    //   }
+    //   // file written successfully
+    // });
+
+
     const resultHtml = compiledTemplate({
+      currentDir,
+      language,
       title: reportToGenerate.title,
       infography:
-        reportToGenerate.infography
-        && require(`../../templates/assets/${reportToGenerate.infography}`),
-      forms: formsKeys.reduce((formResults, formKey) => {
-        const formID = FORMS[formKey] ? FORMS[formKey] : COMPUTED_FORMS[formKey];
-
-        return {
-          ...formResults,
-          [formKey]: formResults[formID]
-        };
-      }, results)
+        reportToGenerate.infography && require(`../../templates/assets/${reportToGenerate.infography}`),
+      forms: a
     });
+
+    // console.log(formsKeys.reduce((formResults, formKey) => {
+    //   const formID = FORMS[formKey] ? FORMS[formKey]['forms'][language] : COMPUTED_FORMS[formKey][language];
+
+    //   // console.log({ formID });
+
+    //   return {
+    //     ...formResults,
+    //     [formKey]: formResults[formID]
+    //   };
+    // }, results));
 
     // For debugging purposes.
     // wkhtmltopdf(resultHtml, options)
-    //     .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
+    //   .pipe(fs.createWriteStream(`${Date.now()}.pdf`))
 
     // if (saveToS3) {
     //   wkhtmltopdf(resultHtml, options, (error, stream) => {

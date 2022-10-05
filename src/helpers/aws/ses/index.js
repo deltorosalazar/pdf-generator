@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const nodemailer = require('nodemailer');
 const AWS = require('aws-sdk');
 
@@ -5,7 +6,22 @@ const base64Img = 'iVBORw0KGgoAAAANSUhEUgAABEwAAAD+BAMAAADSYo3kAAAABGdBTUEAALGPC
 
 // dev
 
-async function sendMail(base64, email, id) {
+const EMAIL_MESSAGE = {
+  es: `<img style="margin-bottom: 32px; max-width: 425px;" src="cid:logo" />
+    <p>Gracias por diligenciar los formularios MAIKA de salud física y psico social acorde con los lineamientos establecidos.</p>
+    <p>Anexo encontrarás el resultado de tu cociente de bienestar y las gráficas de tu valoración.</p>
+    <p>Ten en cuenta tus resultados para establecer metas  de bienestar para el próximo año entendiendo el bienestar de forma integral y la salud de forma preventiva.</p>
+    <br/>
+    <p>MAIKA <br/> Entiende tu Salud!</p>`,
+  en: ''
+};
+
+const EMAIL_SUBJECT = {
+  es: 'Resultado cociente de bienestar Maika',
+  en: ''
+};
+
+async function sendMail(base64, email, id, language = 'es') {
   try {
     const SES_CONFIG = {
       apiVersion: '2010-12-01',
@@ -17,14 +33,9 @@ async function sendMail(base64, email, id) {
     const transporter = nodemailer.createTransport({
       SES: new AWS.SES()
     });
-    const text = `<img style="margin-bottom: 32px; max-width: 425px;" src="cid:logo" />
-    <p>Gracias por diligenciar los formularios MAIKA de salud física y psico social acorde con los lineamientos establecidos.</p>
-    <p>Anexo encontrarás el resultado de tu cociente de bienestar y las gráficas de tu valoración.</p>
-    <p>Ten en cuenta tus resultados para establecer metas  de bienestar para el próximo año entendiendo el bienestar de forma integral y la salud de forma preventiva.</p> 
-    <br/>
-    <p>MAIKA <br/> Entiende tu Salud!</p>`;
+    const text = EMAIL_MESSAGE[language];
 
-    const subjectMessage = `Resultado cociente de bienestar Maika`;
+    const subjectMessage = EMAIL_SUBJECT[language];
 
     const subject = process.env.NODE_ENV === 'production' ? subjectMessage : `${subjectMessage} - ${id}`;
     // send mail with defined transport object

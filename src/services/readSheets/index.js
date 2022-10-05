@@ -1,6 +1,11 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
+const {
+  GoogleSpreadsheet,
+  GoogleSpreadsheetRow,
+  GoogleSpreadsheetWorksheet
+} = require('google-spreadsheet');
 const {
   GLOBAL_ENV_VARIABLES,
+  GOOGLE_API_PERMISSIONS,
   GOOGLE_API_QUOTA_EXCEEDED,
   MAIKA_EMPTY_FORM,
   MAIKA_RECORD_NOT_FOUND
@@ -9,13 +14,37 @@ const MaikaError = require('../../shared/MaikaError');
 
 /**
  *
+ * @param {*} forms
+ * @param {*} language
+ */
+const getFormsByLanguage = (forms, language) => {
+  return forms.map((form) => {
+    return form['id'][language];
+  });
+};
+
+/**
+ *
  * @param {GoogleSpreadsheetWorksheet} sheet
- * @param {Array} rows
+ * @param {GoogleSpreadsheetRow[]} rows
  * @param {string} field
- * @param {*} value
+ * @param {string} value
  */
 const getRowsByField = async (sheet, rows, field, value) => {
   const { headerValues } = sheet;
+
+  if (!headerValues.includes(field)) {
+    throw new MaikaError(
+      400,
+      'Ninguna columna coincide con el ID',
+      MAIKA_RECORD_NOT_FOUND,
+      {
+        received: field,
+        expected: headerValues
+      }
+    );
+  }
+
   const records = rows.filter((row) => {
     return row[field].toString() === value.toString();
   });
@@ -32,7 +61,7 @@ const getRowsByField = async (sheet, rows, field, value) => {
     );
   }
 
-  // Gets the latest record, which means the last form wass filled to that user.
+  // Gets the latest record, which means the last form was filled to that user.
   const lastRecord = records.pop();
   const parsedRecord = {};
 
@@ -46,11 +75,26 @@ const getRowsByField = async (sheet, rows, field, value) => {
 /**
  *
  * @param {string} sheetID
+ * @param {string} uniqueIDKey
  * @param {string} patientID
  * @returns
  */
-const readSheet = async (sheetID, patientID) => {
-  const spreadsheet = new GoogleSpreadsheet(sheetID);
+const readSheet = async (sheetID, uniqueIDKey, patientID) => {
+  console.log({ sheetID, uniqueIDKey, patientID });
+  let spreadsheet = null;
+
+  try {
+    spreadsheet = new GoogleSpreadsheet(sheetID);
+  } catch (error) {
+    throw new MaikaError(
+      error.response.status,
+      'No tienes permisos para ver esta Hoja de Cálculo.',
+      GOOGLE_API_PERMISSIONS,
+      {
+        received: sheetID
+      }
+    );
+  }
 
   const {
     GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -109,38 +153,44 @@ const readSheet = async (sheetID, patientID) => {
   return getRowsByField(
     sheet,
     rows,
-    'Documento de Identidad Paciente',
+    uniqueIDKey,
     patientID
   );
 };
 
 /**
- * Reads all the required sheet based on the report.
+ * Reads all the required sheets based on the selected report.
+ *
+ * @param {string} language
  * @param {string} patientID
  * @param {Object} reportToGenerate
  * @returns
  */
-const readSheets = async (patientID, reportToGenerate) => {
+const readSheets = async (language, patientID, reportToGenerate) => {
   const parsedID = patientID.toString();
+  const reportForms = reportToGenerate.forms;
+  const uniqueIDKey = language === 'es'
+    ? 'Documento de Identidad Paciente'
+    : "Patient's Cellphone";
 
-  if (!reportToGenerate.forms) {
+  if (!reportForms.length) {
     return [];
   }
 
-  const reportForms = Object.keys(reportToGenerate.forms);
+  console.log({ reportForms });
+
+  const formsID = getFormsByLanguage(reportForms, language);
 
   const formsResults = await Promise.all(
-    reportForms.map((form) => {
-      return readSheet(form, parsedID);
+    formsID.map((sheetID) => {
+      return readSheet(sheetID, uniqueIDKey, parsedID);
     })
-  ).catch((err) => {
-    return Promise.reject(err);
-  });
+  );
 
-  const results = formsResults.reduce((resultsObject, formResult, index) => {
+  const results = formsResults.reduce((accumulatedResults, formResult, index) => {
     return {
-      ...resultsObject,
-      [reportForms[index]]: formResult
+      ...accumulatedResults,
+      [formsID[index]]: formResult
     };
   }, {});
 
@@ -207,7 +257,7 @@ const readFullSheet = async (sheetID) => {
   return {
     sheet,
     rows
-  }
+  };
 };
 
 module.exports = { readSheets, readFullSheet };

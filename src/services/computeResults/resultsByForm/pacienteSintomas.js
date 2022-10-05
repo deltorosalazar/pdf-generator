@@ -14,6 +14,7 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results) => {
+  console.log('Formualrio Síntomas Médicos (ES)');
   const labels = [
     'Cabeza',
     'Corazón',
@@ -167,7 +168,8 @@ const computeResults = (report, formConfig, results) => {
     maxValues,
     patientName: results['Nombre del Paciente'],
     values,
-    symptomsByChartSection
+    symptomsByChartSection,
+    tableBounds: formConfig.tableBounds
   };
 };
 

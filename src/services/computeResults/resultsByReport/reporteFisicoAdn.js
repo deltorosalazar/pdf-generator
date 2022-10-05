@@ -1,15 +1,24 @@
 /* eslint-disable max-len */
+const Logger = require('../../../shared/Logger');
 const computeResultsByForm = require('../resultsByForm');
 
-const reporteMentalAdn = (report, results) => {
-  const reports = Object.keys(report.forms).reduce((reportForms, currentFormID) => {
+const reporteFisicoAdn = (language, report, results) => {
+  Logger.log('📄 Reporte Físico ADN');
+  Logger.log({
+    forms: report.forms.map((form) => form.id),
+    results
+  });
+
+  const forms = report.forms.reduce((reportForms, form) => {
+    const formID = form.id[language];
+
     return {
       ...reportForms,
-      [currentFormID]: computeResultsByForm[currentFormID](report, report.forms[currentFormID], results[currentFormID])
+      [formID]: computeResultsByForm[formID](report, form, results[formID])
     };
   }, {});
 
-  return reports;
+  return forms;
 };
 
-module.exports = reporteMentalAdn;
+module.exports = reporteFisicoAdn;

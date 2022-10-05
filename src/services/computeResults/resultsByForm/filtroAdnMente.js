@@ -16,23 +16,9 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
-  // const labels = Object.keys(results).filter((_, index) => {
-  //   return index > offsetIndexes;
-  // });
-
-  // console.log({ labels });
-
-  const labels = [
-    'Estrés & Ansiedad',
-    'Depresión',
-    'Desorden Afectivo Estacional',
-    'Esquizofrenia',
-    'Habilidad Cognitiva',
-    'Calidad del Sueño',
-    'Deficit de Atención / Hiper actividad',
-    'Relacionamiento',
-    'Desorden Obsesivo Compulsivo'
-  ]
+  const labels = Object.keys(results).filter((_, index) => {
+    return index > offsetIndexes;
+  });
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);
@@ -41,7 +27,9 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     return (parseInt(values[index]) / maxValues[index]).toFixed(2);
   });
   // eslint-disable-next-line max-len
-  const wellnessQuotient = (ArrayUtils.sumValues(values) / ArrayUtils.sumValues(maxValues)).toFixed(2);
+  const wellnessQuotient = (
+    ArrayUtils.sumValues(values, false) / ArrayUtils.sumValues(maxValues)
+  ).toFixed(2);
 
   return {
     date: results['Fecha'],
@@ -51,7 +39,8 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     percentages,
     table,
     values,
-    wellnessQuotient
+    wellnessQuotient,
+    tableBounds: formConfig.tableBounds
   };
 };
 

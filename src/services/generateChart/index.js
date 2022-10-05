@@ -1,8 +1,8 @@
 const { CHARTS } = require('../../shared/constants');
 const generateRadarChart = require('./radar');
 
-const generateChart = (chartID, results, config) => {
-  switch (chartID) {
+const generateChart = (chartTypeID, results, config) => {
+  switch (chartTypeID) {
     case CHARTS.RADAR:
       return generateRadarChart(results, config);
 

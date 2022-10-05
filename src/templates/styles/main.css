@@ -1,0 +1,35 @@
+.date {
+  margin-bottom: 16px;
+}
+
+.date span {
+  font-weight: 700;
+}
+
+.banner {
+  height: 350px;
+  width: 100%;
+}
+
+.banner .banner__image {
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
+}
+
+.conventions-wrapper {
+  padding: 0 3rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+.conventions-wrapper .convention span {
+  font-family: "MontserratBold";
+  font-weight: 700;
+}
+
+.footnote {
+  font-size: 12px;
+}

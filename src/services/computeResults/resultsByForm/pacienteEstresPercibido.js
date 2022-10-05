@@ -36,7 +36,7 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     'En el último mes, ¿ con que frecuencia ha pensado sobre las cosas que le quedan por hacer?',
     'En el último mes, ¿ con que frecuencia ha podido controlar la forma de pasar el tiempo?',
     'En el último mes, ¿ con que frecuencia ha sentido que las dificultades se acumulan tanto que no puede superarlas?'
-  ]
+  ];
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);

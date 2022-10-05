@@ -1,4 +1,4 @@
-# Generador de PDF
+# Maika / Generador de PDF
 
 - Instalar dependencias
 
@@ -52,6 +52,31 @@ cp .env.template .env
 ```
 npm start
 ```
+
+## Respuestas de los Formularios
+
+### Paciente
+
+| Reporte                                           | Hoja de Cálculo                               |
+| ------------------------------------------------- | --------------------------------------------- |
+| Escala de Trastorno de Ansiedad Generalizada (ES) | 1GojPR3gY8fI33PUg17yY19JQlIehetcsLfYIl7Lg4AQ  |
+| Escala de Trastorno de Ansiedad Generalizada (EN) | 1LA7UjA5bdRFjzV7mt8yIqBXf1jVkiI1CP4PCJI-pzCI  |
+| Escala de Estrés Percibido (ES)                   | 1DiZFEn-iWLmmwi9Kts2hHPhVfpwjEk_euTZJhcHeLGo  |
+| Escala de Estrés Percibido (EN)                   | 1vFYRNllTpHGQSQzq49gPB2tKvOYE2zGmY66DVJRTw0E  |
+| Salud del Paciente PHQ-9 (ES)                     | 1H0paNaHbzuvXRpvw6NMWLIkIMeoxOmcby7N5DRiAb5g  |
+| Salud del Paciente PHQ-9 (EN)                     | 1U24xod6J-\_y8MrbHIjPe23QgxGMkhVQSC039sl6cmzI |
+| Síntomas Médicos (ES)                             | 1Z-Dwj_YKzrunsGLW3uDpYBFEHkIZ-eXkS-MFPGVJzxY  |
+| Síntomas Médicos (EN)                             | 1xdKeJWjw6mgGBEA0IPQp_BOyiOEfB00o0qXS0b_hGoI  |
+| Respuesta a Medicamentos (ES)                     | 1NovIEzZb6Zde7BKSUtR6P2KjgZCiGq-1HyO9Wnn7V18  |
+
+### Médico
+
+| Reporte                | Hoja de Cálculo                              |
+| ---------------------- | -------------------------------------------- |
+| Filtro ADN Físico (ES) | 1RtyQxNGrrbi4zKKOaKYdg9P0fgj7L9Sve1gKRvrkz5o |
+| Filtro ADN Físico (EN) | 1z6rrD7VEbpqXtafhUvquDhfVQRA6_ZTOjd3byT0jekU |
+| Filtro ADN Mente (ES)  | 12zWM0PEp9q8Zuol4ZBNU0nOGDLmVD4HSnT3HjPQAHAc |
+| Filtro ADN Mente (EN)  | 1rzRAdMiA1pXenPgLFhW5XM3ZYOEo7UnqNVaIGLRLctY |
 
 ## Cómo Generar un PDF
 

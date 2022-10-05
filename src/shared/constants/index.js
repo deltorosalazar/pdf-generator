@@ -1,14 +1,13 @@
 const CHARTS = require('./charts');
-const {
-  FORMS,
-  COMPUTED_FORMS
-} = require('./forms');
+const { FORMS } = require('./forms');
+const { COMPUTED_FORMS } = require('./computedForms');
 const REPORTS = require('./reports');
+
 const EMAIL_STATUS = {
   SENT: 'sent',
   QUEUE: 'queue',
   FAILED: 'failed'
-}
+};
 
 module.exports = {
   CHARTS,

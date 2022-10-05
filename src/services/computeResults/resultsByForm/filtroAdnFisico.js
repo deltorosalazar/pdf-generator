@@ -15,23 +15,9 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
-  // const labels = Object.keys(results).filter((_, index) => {
-  //   return index > offsetIndexes;
-  // });
-
-  const labels = [
-    'Riesgo Cardiovascular',
-    'Riesgo Diabetes',
-    'Sobrepeso',
-    'Cancer',
-    'Enfermedad Autoinmune',
-    'Enfermedad del Colon',
-    'Enfermedad del Hígado',
-    'Alzheimer',
-    'Parkinson',
-    'Enfermedad Pulmonar',
-    'Fatiga'
-  ]
+  const labels = Object.keys(results).filter((_, index) => {
+    return index > offsetIndexes;
+  });
 
   const values = labels.map((label) => parseInt(results[label]));
   const table = labels.map((label, index) => [label, values[index]]);
@@ -40,7 +26,9 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     return (parseInt(values[index]) / maxValues[index]).toFixed(2);
   });
   // eslint-disable-next-line max-len
-  const wellnessQuotient = (ArrayUtils.sumValues(values) / ArrayUtils.sumValues(maxValues)).toFixed(2);
+  const wellnessQuotient = (
+    ArrayUtils.sumValues(values, false) / ArrayUtils.sumValues(maxValues)
+  ).toFixed(2);
 
   return {
     date: results['Fecha'],
@@ -50,7 +38,8 @@ const computeResults = (report, formConfig, results, offsetIndexes = 4) => {
     patientName: results['Nombre del Paciente'],
     percentages,
     values,
-    wellnessQuotient
+    wellnessQuotient,
+    tableBounds: formConfig.tableBounds
   };
 };
 
