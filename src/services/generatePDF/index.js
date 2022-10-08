@@ -66,7 +66,7 @@ const generatePdf = (language, reportToGenerate, results, generateBase64 = false
     //   };
     // }, {});
 
-    console.log({ a });
+    // console.log({ a });
 
     const currentDir = path.join(__dirname, '../../');
 
@@ -84,7 +84,7 @@ const generatePdf = (language, reportToGenerate, results, generateBase64 = false
       language,
       title: reportToGenerate.title,
       infography:
-        reportToGenerate.infography && require(`../../templates/assets/${reportToGenerate.infography}`),
+        reportToGenerate.infography && require(`../../templates/assets/images/${reportToGenerate.infography[language]}`),
       forms: a
     });
 

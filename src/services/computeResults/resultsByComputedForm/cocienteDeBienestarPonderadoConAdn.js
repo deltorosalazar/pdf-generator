@@ -85,7 +85,7 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results, language) => {
 
   const percentages = values.map((value) => ((value / 5) * 100));
 
-  const table = labels.map((label, index) => [label, percentages[index]]);
+  const table = labels.map((label, index) => [label, Math.round(percentages[index])]);
   const maxValues = labels.map((_) => formConfig.maxValue);
 
   return {

@@ -95,20 +95,22 @@ Para generar un reporte, es necesario enviar un identificador único dependiendo
 
 ```
 curl \
-  -d '{"id": "<id_del_paciente>", "report": "<id_del_reporte>"}' \
+  -d '{"id": "<id_del_paciente>", "report": "<id_del_reporte>", language: "<language>"}' \
   -H "Content-Type: application/json" \
   -X POST http://localhost:4000/base
 ```
 
 **id_del_paciente:** Es la cédula del paciente.
 
-**id_del_reporte:** Es la id del paciente.
+**id_del_reporte:** Es el id del paciente.
+
+**language:** Es el lenguaje en el que s quiere ver el reporte.
 
 Por ejemplo:
 
 ```
 curl \
-  -d '{"id": "2050820455", "report": "REPORTE_FISICO_ADN"}' \
+  -d '{"id": "79558536", "report": "REPORTE_FISICO_ADN"}' \
   -H "Content-Type: application/json" \
   -X POST http://localhost:4000/base
 ```

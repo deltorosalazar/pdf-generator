@@ -17,12 +17,6 @@ const { ArrayUtils } = require('../../../shared/utils');
  * }}
  */
 const cocienteDeBienestarPonderadoConAdn = (formConfig, results, language) => {
-  console.log('🚀');
-  console.log('🚀');
-  console.log('🚀');
-  console.log('🚀');
-  console.log('🚀');
-
   const cocienteDeBienestarPercibido = results['COCIENTE_DE_BIENESTAR_PERCIBIDO'];
   const reporteMaikaIndexes = {
     nivelEnergiaIndex: cocienteDeBienestarPercibido.labels.indexOf('Energy Level'),
@@ -91,36 +85,29 @@ const cocienteDeBienestarPonderadoConAdn = (formConfig, results, language) => {
     ((valoresReporteMaika.esparcimiento * 0.5) + (valoresMenteAdn.recreacion * 0.5)).toFixed(2)
   ];
 
-  console.log('💰💰💰💰💰💰💰💰');
-  console.log([
-    valoresFisicoAdn.nivelEnergia * 0.5,
-    valoresFisicoAdn.saludFisica * 0.5,
-    valoresMenteAdn.estresAnsiedad * 0.5,
-    valoresMenteAdn.capacidadMental * 0.5,
-    valoresReporteMaika.propositoOficio * 0.5,
-    valoresMenteAdn.depresion * 0.5,
-    valoresMenteAdn.relacionamiento * 0.5,
-    valoresMenteAdn.recreacion * 0.5
-  ]);
+  // console.log('💰💰💰💰💰💰💰💰');
+  // console.log([
+  //   valoresFisicoAdn.nivelEnergia * 0.5,
+  //   valoresFisicoAdn.saludFisica * 0.5,
+  //   valoresMenteAdn.estresAnsiedad * 0.5,
+  //   valoresMenteAdn.capacidadMental * 0.5,
+  //   valoresReporteMaika.propositoOficio * 0.5,
+  //   valoresMenteAdn.depresion * 0.5,
+  //   valoresMenteAdn.relacionamiento * 0.5,
+  //   valoresMenteAdn.recreacion * 0.5
+  // ]);
 
-  console.log('💰💰💰💰💰💰💰💰');
-  console.log([
-    valoresReporteMaika.nivelEnergia * 0.5,
-    valoresReporteMaika.saludFisica * 0.5,
-    valoresReporteMaika.estresAnsiedad * 0.5,
-    valoresReporteMaika.capacidadMental * 0.5,
-    valoresReporteMaika.propositoOficio * 0.5,
-    valoresReporteMaika.depresion * 0.5,
-    valoresReporteMaika.relacionamiento * 0.5,
-    valoresReporteMaika.esparcimiento * 0.5
-  ]);
-  // console.log({
-
-  // });
-
-
-
-
+  // console.log('💰💰💰💰💰💰💰💰');
+  // console.log([
+  //   valoresReporteMaika.nivelEnergia * 0.5,
+  //   valoresReporteMaika.saludFisica * 0.5,
+  //   valoresReporteMaika.estresAnsiedad * 0.5,
+  //   valoresReporteMaika.capacidadMental * 0.5,
+  //   valoresReporteMaika.propositoOficio * 0.5,
+  //   valoresReporteMaika.depresion * 0.5,
+  //   valoresReporteMaika.relacionamiento * 0.5,
+  //   valoresReporteMaika.esparcimiento * 0.5
+  // ]);
   const wellnessQuotient = parseFloat(ArrayUtils.sumValues(values, false) / (values.length * 5));
 
   const percentages = values.map((value) => ((value / 5) * 100));

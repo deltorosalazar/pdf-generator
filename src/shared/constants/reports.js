@@ -197,7 +197,10 @@ const REPORTS = {
       es: 'REPORTE_TOTAL_CON_ADN_ES.html',
       en: 'REPORTE_TOTAL_CON_ADN_EN.html'
     },
-    infography: 'metodoMaika',
+    infography: {
+      es: 'metodoMaika__es',
+      en: 'metodoMaika__en'
+    },
     forms: [
       {
         id: {
@@ -312,7 +315,10 @@ const REPORTS = {
   },
   REPORTE_METODO_MAIKA: {
     id: 'REPORTE_METODO_MAIKA',
-    infography: 'metodoMaika',
+    infography: {
+      es: 'metodoMaika__es',
+      en: 'metodoMaika__en'
+    },
     template: {
       es: 'REPORTE_METODO_MAIKA_ES.html',
       en: 'REPORTE_METODO_MAIKA_EN.html'
