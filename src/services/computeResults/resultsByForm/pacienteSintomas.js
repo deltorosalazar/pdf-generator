@@ -32,9 +32,9 @@ const computeResults = (report, formConfig, results) => {
     'Derma',
     'Otros Físicos',
     // These 3 👇🏽 ARE NOT used for ReporteMaika but are used for Reporte Total 360.
-    'Otros Relacionamiento',
-    'Otros Espacios de Esparcimiento/Hobbies',
-    'Otros Propósito en tu oficio'
+    // 'Otros Relacionamiento',
+    // 'Otros Espacios de Esparcimiento/Hobbies',
+    // 'Otros Propósito en tu oficio'
   ];
 
   const symptomsByChartSection = [

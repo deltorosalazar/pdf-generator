@@ -23,12 +23,12 @@ const anexoMental = (formConfig, results, language) => {
   const estresPercibido = results[FORMS.FORMULARIO_PACIENTE_ESTRES_PERCIBIDO['forms'][language]].values;
   const transtornoAnsiedad = results[FORMS.FORMULARIO_PACIENTE_TRANSTORNO_DE_ANSIEDAD_GENERALIZADA['forms'][language]].values;
 
-  console.log({
-    sintomasPorSeccion,
-    saludPhq9,
-    estresPercibido,
-    transtornoAnsiedad
-  });
+  // console.log({
+  //   sintomasPorSeccion,
+  //   saludPhq9,
+  //   estresPercibido,
+  //   transtornoAnsiedad
+  // });
 
   const labels = ['Stress', 'Anxiety', 'Depression'];
   const sumasPorCuestionario = [
@@ -59,8 +59,8 @@ const anexoMental = (formConfig, results, language) => {
 
   const maxValues = values.slice(1).map((_) => formConfig.maxValue);
 
-  console.log('🅿️🅿️🅿️🅿️🅿️🅿️🅿️');
-  console.log({ formConfig });
+  // console.log('🅿️🅿️🅿️🅿️🅿️🅿️🅿️');
+  // console.log({ formConfig });
 
   return {
     date: results['Date'],
